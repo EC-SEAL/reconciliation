@@ -1,0 +1,53 @@
+[
+  {
+    "description": "eIDAS to eduPerson fake mapping, showing both concatenation and transformation in one side",
+    "pairings": [
+      {
+        "profile": "eIDAS",
+        "issuer": "http://clave.redsara.es/",
+        "attributes": [
+          "$surnames"
+        ]
+      },
+      {
+        "profile": "eduPerson",
+        "attributes": [
+          "$surname1",
+          "#",
+          "$surname2"
+        ],
+        "regexp": "^(-,a-zA-Z)+#(-,a-zA-Z)+$",
+        "replace": "$1 $2"
+      }
+    ]
+  },
+  {
+    "description": "Basic mapping, also inaccurate, but to show the options",
+    "pairings": [
+      {
+        "profile": "eIDAS",
+        "attributes": [
+          "$CurrentGivenName"
+        ]
+      },
+      {
+        "profile": "eduPerson",
+        "attributes": [
+          "$givenName"
+        ]
+      },
+      {
+        "profile": "eduPerson",
+        "attributes": [
+          "$displayName"
+        ]
+      },
+      {
+        "profile": "eduPerson",
+        "attributes": [
+          "$cn"
+        ]
+      }
+    ]
+  }
+]

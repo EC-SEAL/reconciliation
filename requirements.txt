@@ -1,0 +1,6 @@
+Flask
+pyopenssl
+wheel
+gunicorn
+textdistance[extras]
+transliterate

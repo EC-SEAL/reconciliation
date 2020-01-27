@@ -1,0 +1,130 @@
+[
+  {
+    "issuer": "https://esmo.uji.es/gw/saml/idp/metadata.xml",
+    "type": "Response",
+    "recipient": "https://seal.uji.es/saml/sp/metadata.xml",
+    "id": "6c0f70a8-f32b-4535-b5f6-0d596c52813a",
+    "inResponseTo": "aa70a8-f32b-4535-b5f6-0d596cbb",
+    "loa": "http://eidas.europa.eu/LoA/substantial",
+    "notBefore": "2018-12-06T19:40:16Z",
+    "notAfter": "2018-12-06T19:45:16Z",
+    "status": {
+      "code": "OK",
+      "subcode": null,
+      "message": null
+    },
+    "attributes": [
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName",
+        "friendlyName": "CurrentGivenName",
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "FRANCISCO JOSE"
+        ]
+      },
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName",
+        "friendlyName": "FamilyName",
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "ARAGO MONZONIS"
+        ]
+      },
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier",
+        "friendlyName": "PersonIdentifier",
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "GR/ES/12345678A"
+        ]
+      }
+    ],
+    "properties": [
+      {
+        "inResponseTo": "9c0f30a8-f32b-4636-b5f6-0d596c42424a"
+      }
+    ]
+  },
+
+
+    {
+    "issuer": "https://idp.rediris.es/module.php/saml2/idp/metadata.xml",
+    "type": "Response",
+    "recipient": "https://seal.uji.es/saml/sp/metadata.xml",
+    "id": "6c0f70a8-f32b-4535-b5f6-0d596c52813b",
+    "inResponseTo": "aa70a8-f32b-4535-b5f6-0d596cbc",
+    "loa": "http://eidas.europa.eu/LoA/low",
+    "notBefore": "2018-12-06T19:40:16Z",
+    "notAfter": "2018-12-06T19:45:16Z",
+    "status": {
+      "code": "OK",
+      "subcode": null,
+      "message": null
+    },
+    "attributes": [
+      {
+        "name": "displayName",
+        "friendlyName": null,
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "Francisco Jose Arago Monzonis"
+        ]
+      },
+      {
+        "name": "schacHomeOrganization",
+        "friendlyName": null,
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "rediris.es"
+        ]
+      },
+      {
+        "name": "givenName",
+        "friendlyName": null,
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "Francisco Jose"
+        ]
+      },
+      {
+        "name": "surname",
+        "friendlyName": null,
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "Arago Monzonis"
+        ]
+      },
+      {
+        "name": "commonName",
+        "friendlyName": null,
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "Francisco Jose Arago Monzonis"
+        ]
+      }
+    ],
+    "properties": [
+      {
+        "inResponseTo": "9c0f30a8-f32b-4636-b5f6-0d596c42424a"
+      }
+    ]
+  }
+]
+
+// TODO seguir: añadir otros dos data sets con datos griegos del user d prueba de eidas.

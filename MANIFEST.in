@@ -1,0 +1,5 @@
+include server.properties
+graft seal-autorecon/static
+graft seal-autorecon/templates
+graft seal-autorecon/swagger
+global-exclude *.pyc
