@@ -1,18 +1,13 @@
 [
   {
-    "issuer": "https://esmo.uji.es/gw/saml/idp/metadata.xml",
-    "type": "Response",
-    "recipient": "https://seal.uji.es/saml/sp/metadata.xml",
     "id": "6c0f70a8-f32b-4535-b5f6-0d596c52813a",
-    "inResponseTo": "aa70a8-f32b-4535-b5f6-0d596cbb",
-    "loa": "http://eidas.europa.eu/LoA/substantial",
-    "notBefore": "2018-12-06T19:40:16Z",
-    "notAfter": "2018-12-06T19:45:16Z",
-    "status": {
-      "code": "OK",
-      "subcode": null,
-      "message": null
-    },
+    "type": "eIDAS",
+    "categories": [],
+    "issuerId": "Issuer",
+    "subjectId": "PersonIdentifier",
+    "loa": "4",
+    "issued": "2018-12-06T19:40:16Z",
+    "expiration": "2018-15-06T19:45:16Z",
     "attributes": [
       {
         "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName",
@@ -43,30 +38,39 @@
         "values": [
           "GR/ES/12345678A"
         ]
+      },
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/DateOfBirth",
+        "friendlyName": "DateOfBirth",
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "1984-07-24"
+        ]
+      },
+      {
+        "name": "Issuer",
+        "friendlyName": "Issuer",
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "https://eidas.redsara.es/EidasNode/ServiceMetadata"
+        ]
       }
     ],
-    "properties": [
-      {
-        "inResponseTo": "9c0f30a8-f32b-4636-b5f6-0d596c42424a"
-      }
-    ]
+    "properties": {}
   },
-
-
-    {
-    "issuer": "https://idp.rediris.es/module.php/saml2/idp/metadata.xml",
-    "type": "Response",
-    "recipient": "https://seal.uji.es/saml/sp/metadata.xml",
-    "id": "6c0f70a8-f32b-4535-b5f6-0d596c52813b",
-    "inResponseTo": "aa70a8-f32b-4535-b5f6-0d596cbc",
-    "loa": "http://eidas.europa.eu/LoA/low",
-    "notBefore": "2018-12-06T19:40:16Z",
-    "notAfter": "2018-12-06T19:45:16Z",
-    "status": {
-      "code": "OK",
-      "subcode": null,
-      "message": null
-    },
+  {
+    "id": "6c0f70a8-f32b-4535-b5f6-0d596c5281aa",
+    "type": "eduGAIN",
+    "categories": [],
+    "issuerId": "Issuer",
+    "subjectId": "schacPersonalUniqueCode",
+    "loa": "2",
+    "issued": "2018-12-06T19:40:16Z",
+    "expiration": "2018-15-06T19:45:16Z",
     "attributes": [
       {
         "name": "displayName",
@@ -117,14 +121,179 @@
         "values": [
           "Francisco Jose Arago Monzonis"
         ]
+      },
+      {
+        "name": "schacPersonalUniqueCode",
+        "friendlyName": "schacPersonalUniqueCode",
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "urn:mace:terena.org:schac:personalUniqueCode:es:rediris:sir:mbid:{md5}fde3899abda05086e6a675518ea6a3f1"
+        ]
+      },
+      {
+        "name": "Issuer",
+        "friendlyName": "Issuer",
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "https://idp.rediris.es/module.php/saml2/idp/metadata.xml"
+        ]
       }
     ],
-    "properties": [
+    "properties": {}
+
+  },
+  {
+    "id": "6c0f70a8-f32b-4535-b5f6-0d596c5281ac",
+    "type": "eIDAS",
+    "categories": [],
+    "issuerId": "Issuer",
+    "subjectId": "PersonIdentifier",
+    "loa": "4",
+    "issued": "2018-12-06T19:40:16Z",
+    "expiration": "2018-15-06T19:45:16Z",
+    "attributes": [
       {
-        "inResponseTo": "9c0f30a8-f32b-4636-b5f6-0d596c42424a"
+        "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName",
+        "friendlyName": "CurrentGivenName",
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "ΑΝΔΡΕΑΣ",
+          "ANDREAS"
+        ]
+      },
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName",
+        "friendlyName": "FamilyName",
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "ΠΕΤΡΟΥ",
+          "PETROU"
+        ]
+      },
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier",
+        "friendlyName": "PersonIdentifier",
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "GR/ES/ERMIS-11076669"
+        ]
+      },
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/DateOfBirth",
+        "friendlyName": "DateOfBirth",
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "1980-01-01"
+        ]
+      },
+      {
+        "name": "Issuer",
+        "friendlyName": "Issuer",
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "https://www.ermis.gov.gr/ermis-eidas-idp/metadata"
+        ]
       }
-    ]
+    ],
+    "properties": {}
+  },
+  {
+    "id": "6c0f70a8-f32b-4535-b5f6-0d596c52813g",
+    "type": "eIDAS",
+    "categories": [],
+    "issuerId": "Issuer",
+    "subjectId": "eduPersonTargetedID",
+    "loa": "4",
+    "issued": "2018-12-06T19:40:16Z",
+    "expiration": "2018-15-06T19:45:16Z",
+    "attributes": [
+      {
+        "name": "displayName",
+        "friendlyName": null,
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "Andreas Petro"
+        ]
+      },
+      {
+        "name": "schacHomeOrganization",
+        "friendlyName": null,
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "uaegean.gr"
+        ]
+      },
+      {
+        "name": "givenName",
+        "friendlyName": null,
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "Andreas"
+        ]
+      },
+      {
+        "name": "surname",
+        "friendlyName": null,
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "Petro"
+        ]
+      },
+      {
+        "name": "commonName",
+        "friendlyName": null,
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "Andreas Petro"
+        ]
+      },
+      {
+        "name": "eduPersonTargetedID",
+        "friendlyName": "eduPersonTargetedID",
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "22aba767da7237d8e8b75f27a8fb56a4"
+        ]
+      },
+      {
+        "name": "Issuer",
+        "friendlyName": "Issuer",
+        "encoding": "plain",
+        "language": null,
+        "isMandatory": true,
+        "values": [
+          "https://idp.uaegean.gr/module.php/saml2/idp/metadata.xml"
+        ]
+      }
+    ],
+    "properties": {}
   }
+
 ]
 
-// TODO seguir: añadir otros dos data sets con datos griegos del user d prueba de eidas.

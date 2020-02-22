@@ -4,17 +4,24 @@
     "pairings": [
       {
         "profile": "eIDAS",
-        "issuer": "http://clave.redsara.es/",
+        "issuer": null,
+        "categories": [],
         "attributes": [
-          "$surnames"
-        ]
+          "$CurrentGivenName",
+          " ",
+          "FamilyName"
+        ],
+        "regexp": "^(-,a-zA-Z)+#(-,a-zA-Z)+$",
+        "replace": "$1 $2"
       },
       {
-        "profile": "eduPerson",
+        "profile": "eduGAIN",
+        "issuer": null,
+        "categories": [],
         "attributes": [
-          "$surname1",
+          "$givenName",
           "#",
-          "$surname2"
+          "$surname"
         ],
         "regexp": "^(-,a-zA-Z)+#(-,a-zA-Z)+$",
         "replace": "$1 $2"
@@ -26,27 +33,41 @@
     "pairings": [
       {
         "profile": "eIDAS",
+        "issuer": null,
+        "categories": [],
         "attributes": [
           "$CurrentGivenName"
-        ]
+        ],
+        "regexp": null,
+        "replace": null
       },
       {
         "profile": "eduPerson",
+        "issuer": null,
+        "categories": [],
         "attributes": [
           "$givenName"
-        ]
+        ],
+        "regexp": null,
+        "replace": null
       },
       {
         "profile": "eduPerson",
+        "issuer": null,
         "attributes": [
           "$displayName"
-        ]
+        ],
+        "regexp": null,
+        "replace": null
       },
       {
         "profile": "eduPerson",
+        "issuer": null,
         "attributes": [
           "$cn"
-        ]
+        ],
+        "regexp": null,
+        "replace": null
       }
     ]
   }
