@@ -213,7 +213,7 @@
   },
   {
     "id": "6c0f70a8-f32b-4535-b5f6-0d596c52813g",
-    "type": "eIDAS",
+    "type": "eduGAIN",
     "categories": [],
     "issuerId": "Issuer",
     "subjectId": "eduPersonTargetedID",

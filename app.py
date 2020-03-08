@@ -4,6 +4,7 @@
 from config import config
 from engine import app
 import apiloader
+import logging
 
 # Read Server configuration
 host = config.get('Server', 'host', fallback='localhost')
@@ -15,6 +16,16 @@ enableSSL = config.getboolean('SSL', 'enable', fallback=False)
 cert = config.get('SSL', 'cert', fallback=None)
 key = config.get('SSL', 'key', fallback=None)
 
+# Logging configuration
+loglevel = config.get('Log', 'level', fallback=logging.WARNING)
+logfile = config.get('Log', 'file', fallback=None)
+
+
+# Setup logger
+logging.basicConfig(level=loglevel,
+                    format='%(asctime)s %(levelname)s:%(name)s: %(message)s',
+                    filename=logfile)
+
 
 # Publish root test service
 @app.route('/')
@@ -24,7 +35,6 @@ def hello_world():
 
 # Publish the rest of the services defined on the api directory
 apiloader.load_api()
-
 
 # Launch server
 #   to launch in production:
