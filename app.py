@@ -17,7 +17,7 @@ cert = config.get('SSL', 'cert', fallback=None)
 key = config.get('SSL', 'key', fallback=None)
 
 # Logging configuration
-loglevel = config.get('Log', 'level', fallback=logging.WARNING)
+loglevel = config.get('Log', 'level', fallback=logging.INFO)
 logfile = config.get('Log', 'file', fallback=None)
 
 

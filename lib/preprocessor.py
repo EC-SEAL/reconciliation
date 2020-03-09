@@ -8,7 +8,6 @@
 
 # Clean all - _ , . tabs, etc to separate words with just single spaces
 import re
-import string
 import logging
 
 from lib.transliteration import Transliteration
@@ -24,9 +23,9 @@ class Preprocessor:
     # Input transfroms are only those relevant for the datasets being compared
     def transform(self, set_a, set_b, transforms):
         logging.debug("preprocessor.transform")
-        logging.debug("Transforms: "+str(transforms))
-        logging.debug("Dataset A: "+str(set_a))
-        logging.debug("Dataset B: "+str(set_b))
+        logging.debug("Transforms: " + str(transforms))
+        logging.debug("Dataset A: " + str(set_a))
+        logging.debug("Dataset B: " + str(set_b))
         # Loop the maps, and feed from the datasets.
         # Each map will produce a tuple to be compared
         compare_tuples = []
@@ -68,30 +67,31 @@ class Preprocessor:
 
             # If something weird happened, sanitize, log warning and go on
             if len(compare_tuple) > 2:
-                # TODO: log something, as this means the maps are not precise enough
+                logging.warning("A tuple had more than 2 elements. Maps are not precise enough")
                 compare_tuple = (compare_tuple[0], compare_tuple[1])
 
             # Avoid two-empty string comparisons
             if compare_tuple[0] != "" or compare_tuple[1] != "":
                 compare_tuples.append(compare_tuple)
             else:
-                # TODO: log something, as this means the maps are not precise enough
-                pass
+                logging.warning("Both elements in a tuple were empty strings. Maps are not precise enough")
 
         return compare_tuples
 
+    # Return a string consisting of the concatenation of the array items, previously substituting
+    # variables for the attribute values in the data set
     def substitute(self, attribute_list, dataset):
         logging.debug("preprocessor.substitute")
-        logging.debug("attribute_list: "+str(attribute_list))
-        logging.debug("dataset: "+str(dataset))
+        logging.debug("attribute_list: " + str(attribute_list))
+        logging.debug("dataset: " + str(dataset))
 
         if not attribute_list:
-            # TODO decide how to behave if no attributes were passed, for the moment, just empty string
+            logging.warning("No attributes were passed. Returning empty string")
             return ""
 
         final_string = ""
         for item in attribute_list:
-            logging.debug("item: "+item)
+            logging.debug("item: " + item)
 
             # It is a placeholder
             if item[0] == "$":
@@ -103,7 +103,7 @@ class Preprocessor:
                     final_string = final_string + value
                     logging.debug("final_string: " + final_string)
                 else:
-                    logging.warning("attribute "+item[1:]+" not found in dataset: "+ str(dataset['attributes']))
+                    logging.warning("attribute " + item[1:] + " not found in dataset: " + str(dataset['attributes']))
             else:
                 final_string = final_string + item
                 logging.debug("final_string: " + final_string)
@@ -112,10 +112,10 @@ class Preprocessor:
 
     def getAttributeValue(self, attr_name, attr_list):
         logging.debug("preprocessor.getAttributeValue")
-        logging.debug("attr_name:"+attr_name)
-        logging.debug("attr_list:"+str(attr_list))
+        logging.debug("attr_name:" + attr_name)
+        logging.debug("attr_list:" + str(attr_list))
         for attr in attr_list:
-            name = set([attr['name'], attr['friendlyName']])
+            name = {attr['name'], attr['friendlyName']}
             if attr_name in name:
                 logging.debug("found")
                 return attr['values'][0]
@@ -163,9 +163,7 @@ class MapDatasetMatchNotFound(Exception):
         self.message = message
 
 
-# TODO: add a exhaustive logging in multiple levels to all of th module, to allow tracing and accounting
 
-# TODO: weight each pair, so add the weight to the outcome of the comparison
 # To select the list of transforms:
 # From all the maps, get only those that are relevant fro this case:
 #    - get a map if both dataset types are the profile of at least two of the pairings

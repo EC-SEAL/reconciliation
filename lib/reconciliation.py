@@ -14,8 +14,9 @@ class Reconciliation:
         pass
 
 
-# Lowercase después de translit o antes? probar a lowercase el griego a ver, pero creo que mejor lowercase después
-
+# TODO: add accounting logs (INFO)
+# TODO: update swagger file
+# TODO: weight each pair, so add the weight to the outcome of the comparison
 '''
 
         a = "aabc"

@@ -88,3 +88,7 @@ class TransliterationTest(unittest.TestCase):
     def test_case_armenian_ascii(self):
         res = self.trans.to_ascii(self.strings['armenian_hy'])
         self.assertEqual(res, self.strings['latin_l1'])
+
+
+if __name__ == '__main__':
+    unittest.main()
