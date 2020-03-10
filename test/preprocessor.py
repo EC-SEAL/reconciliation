@@ -5,26 +5,35 @@ import unittest
 
 import json
 
+from lib.dto.AttributeMap import AttributeMap
+from lib.dto.Dataset import Dataset
 from lib.preprocessor import Preprocessor, MapDatasetMatchNotFound
-# import logging
+import logging
 
 
 class PreprocessorTest(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(PreprocessorTest, self).__init__(*args, **kwargs)
-
-        # logging.basicConfig(level=logging.INFO)
-
+        #logging.basicConfig(level=logging.DEBUG)
         self.init_tests()
 
     def init_tests(self):
         # Test data sets
+        self.datasets = []
         with open('testDatasets.json', encoding="utf8") as datasets_file:
-            self.datasets = json.load(datasets_file)
+            datasets = json.load(datasets_file)
+            for dt in datasets:
+                d = Dataset()
+                self.datasets.append(d.unmarshall(dt))
 
+        self.matchings = []
         with open('attributeMaps.json', encoding="utf8") as matchings_file:
-            self.matchings = json.load(matchings_file)
+            matchings = json.load(matchings_file)
+            for mt in matchings:
+                m = AttributeMap()
+                self.matchings.append(m.unmarshall(mt))
+
 
     def test_clean_spaces(self):
         input_string = "   a  b    c    d "
@@ -53,7 +62,7 @@ class PreprocessorTest(unittest.TestCase):
 
     def test_no_getAttributeValue(self):
         attr_name = "fail"
-        attr_list = self.datasets[0]['attributes']
+        attr_list = self.datasets[0].attributes
         p = Preprocessor()
         value = p.getAttributeValue(attr_name, attr_list)
         self.assertIsNone(value)
@@ -86,6 +95,8 @@ class PreprocessorTest(unittest.TestCase):
         ctuples = p.transform(self.datasets[0],
                               self.datasets[1],
                               self.matchings)
+
+        self.assertGreaterEqual(len(ctuples), 1)
         for tp in ctuples:
             self.assertEqual(tp[0], tp[1])
 
@@ -94,6 +105,8 @@ class PreprocessorTest(unittest.TestCase):
         ctuples = p.transform(self.datasets[2],
                               self.datasets[3],
                               self.matchings)
+
+        self.assertEqual(len(ctuples), 1)
         self.assertEqual(ctuples[0][0], "ANDREAS PETROU")
         self.assertEqual(ctuples[0][1], "ANDREAS PETRO")
 

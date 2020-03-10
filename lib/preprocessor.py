@@ -4,24 +4,31 @@
 
 # Here implement the transformation of the input sets into a list of tuples of strings,
 # using the input transformations. The resulting tuples will be compared and based on their similarity, a
+# To select the list of transforms:
+# From all the maps, get only those that are relevant fro this case:
+#    - get a map if both dataset types are the profile of at least two of the pairings
+#    - if issuer is defined, get a map just if both dataset issuers are on the pairings
+#    - if categories are defined in the data sets, get a map just if categories of both datasets
+#      are on the categories of some pairings (each dataset on a pairing, of course)
 
 
-# Clean all - _ , . tabs, etc to separate words with just single spaces
 import re
 import logging
+from typing import List
 
+from lib.dto.Dataset import Dataset, Attribute
 from lib.transliteration import Transliteration
-
+from lib.dto.AttributeMap import AttributeMap, Pairing
+import definitions
 
 class Preprocessor:
 
     def __init__(self):
         self.trans = Transliteration()
-        self.unwanted_chars = "-.,;:_·<>+\\\|/'#@()\"\t\n\r!%&=?¡¿"
         pass
 
     # Input transfroms are only those relevant for the datasets being compared
-    def transform(self, set_a, set_b, transforms):
+    def transform(self, set_a: Dataset, set_b: Dataset, transforms: List[AttributeMap]):
         logging.debug("preprocessor.transform")
         logging.debug("Transforms: " + str(transforms))
         logging.debug("Dataset A: " + str(set_a))
@@ -29,15 +36,15 @@ class Preprocessor:
         # Loop the maps, and feed from the datasets.
         # Each map will produce a tuple to be compared
         compare_tuples = []
-        for tr in transforms:
+        for transform in transforms:
 
             compare_tuple = []
-            for pr in tr['pairings']:  # TODO add a weight to the tuple
+            for pair in transform.pairings:  # TODO add a weight to the tuple
                 # Get dataset of a type, issuer and categories
                 try:
-                    st = self.match_set(pr['profile'],
-                                        pr['issuer'],
-                                        pr['categories'],
+                    st = self.match_set(pair.profile,
+                                        pair.issuer,
+                                        pair.categories,
                                         set_a, set_b)
                 except MapDatasetMatchNotFound:
                     # If pairing does not match this case, we fail silently and go on
@@ -45,12 +52,12 @@ class Preprocessor:
 
                 # Substitute placeholders for attributes and Concatenate.
                 # (if attr not found, fail silently and leave empty string)
-                final_str = self.substitute(pr['attributes'], st)
+                final_str = self.substitute(pair.attributes, st)
 
                 # Match and replace if required
-                if 'regexp' in pr and pr['regexp'] is not None \
-                        and 'replace' in pr and pr['replace'] is not None:
-                    final_str = re.sub(pr['regexp'], pr['replace'], final_str)
+                if pair.regexp is not None \
+                        and pair.replace is not None:
+                    final_str = re.sub(pair.regexp, pair.replace, final_str)
 
                 # Transliterate to ascii
                 final_str = self.trans.to_ascii(final_str)
@@ -80,7 +87,7 @@ class Preprocessor:
 
     # Return a string consisting of the concatenation of the array items, previously substituting
     # variables for the attribute values in the data set
-    def substitute(self, attribute_list, dataset):
+    def substitute(self, attribute_list: List[str], dataset: Dataset):
         logging.debug("preprocessor.substitute")
         logging.debug("attribute_list: " + str(attribute_list))
         logging.debug("dataset: " + str(dataset))
@@ -97,28 +104,28 @@ class Preprocessor:
             if item[0] == "$":
                 logging.debug("It is a placeholder")
                 # Seek it on the attrs at the dataset
-                value = self.getAttributeValue(item[1:], dataset['attributes'])
+                value = self.getAttributeValue(item[1:], dataset.attributes)
                 if value is not None:
                     logging.debug("Returned value: " + value)
                     final_string = final_string + value
                     logging.debug("final_string: " + final_string)
                 else:
-                    logging.warning("attribute " + item[1:] + " not found in dataset: " + str(dataset['attributes']))
+                    logging.warning("attribute " + item[1:] + " not found in dataset: " + str(dataset.attributes))
             else:
                 final_string = final_string + item
                 logging.debug("final_string: " + final_string)
         logging.debug("returning final_string: " + final_string)
         return final_string
 
-    def getAttributeValue(self, attr_name, attr_list):
+    def getAttributeValue(self, attr_name, attr_list: List[Attribute]):
         logging.debug("preprocessor.getAttributeValue")
         logging.debug("attr_name:" + attr_name)
         logging.debug("attr_list:" + str(attr_list))
         for attr in attr_list:
-            name = {attr['name'], attr['friendlyName']}
+            name = {attr.name, attr.friendlyName}
             if attr_name in name:
                 logging.debug("found")
-                return attr['values'][0]
+                return attr.values[0]
         return None
 
     # Will return which of the datasets matches the criteria, or launch an exception otherwise
@@ -127,22 +134,22 @@ class Preprocessor:
         found = False
         for st in sets:
             # If type does not match, skip
-            if st['type'] != profile:
+            if st.type != profile:
                 continue
             # If there is a fixed issuer
             if issuer is not None:
-                if st['issuerId'] is None or st['issuerId'] == "":
+                if st.issuerId is None or st.issuerId == "":
                     continue
-                if st['issuerId'] not in st['attributes']:
+                if st.issuerId not in st.attributes:
                     continue
-                if st['attributes'][st['issuerId']] != profile:
+                if st.attributes[st.issuerId] != profile:
                     continue
             found = True
             # If there are fixed categories to find (one found is ok)
             if categories is not None and categories != []:
                 found = False
                 for cat in categories:
-                    if cat in st['categories']:
+                    if cat in st.categories:
                         found = True
                         break
             if found:
@@ -151,7 +158,7 @@ class Preprocessor:
             raise MapDatasetMatchNotFound("Passed datasets do not fulfill the criteria")
 
     def clean_string(self, input_string):
-        return re.sub("[" + self.unwanted_chars + "]", ' ', input_string)
+        return re.sub("[" + definitions.UNWANTED_CHARS + "]", ' ', input_string)
 
     def clean_spaces(self, input_string):
         s = re.sub("\s+", ' ', input_string)
@@ -161,22 +168,3 @@ class Preprocessor:
 class MapDatasetMatchNotFound(Exception):
     def __init__(self, message):
         self.message = message
-
-
-
-# To select the list of transforms:
-# From all the maps, get only those that are relevant fro this case:
-#    - get a map if both dataset types are the profile of at least two of the pairings
-#    - if issuer is defined, get a map just if both dataset issuers are on the pairings
-#    - if categories are defined in the data sets, get a map just if categories of both datasets
-#      are on the categories of some pairings (each dataset on a pairing, of course)
-
-'''
-def json_validator(data):
-    try:
-        json.loads(data)
-        return True
-    except ValueError as error:
-        print("invalid json: %s" % error)
-        return False
-'''

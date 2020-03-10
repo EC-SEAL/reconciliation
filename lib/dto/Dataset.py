@@ -1,4 +1,4 @@
-from lib.dto.dto import DTO
+from lib.dto.Dto import DTO
 
 
 class Dataset(DTO):
