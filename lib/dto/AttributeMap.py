@@ -11,6 +11,7 @@ class Pairing(DTO):
     def __init__(self):
         self.profile = str
         self.issuer = str
+        self.categories = [str]
         self.attributes = [str]
         self.regexp = str
         self.replace = str

@@ -2,7 +2,8 @@ import json
 import unittest
 
 from lib.dto.dto import DTO
-from lib.dto.AttributeMap import AttributeMap, Pairing
+from lib.dto.AttributeMap import AttributeMap
+from lib.dto.Dataset import Dataset
 
 
 class Phone (DTO):
@@ -139,8 +140,7 @@ class MyTestCase(unittest.TestCase):
         res_str = json.dumps(res_dict)
         self.assertEqual(expected_str, res_str)
 
-
-    def test_attributeMap(self):
+    def test_AttributeMap(self):
         with open('attributeMaps.json', encoding="utf8") as matchings_file:
             matchings = json.load(matchings_file)
 
@@ -148,6 +148,16 @@ class MyTestCase(unittest.TestCase):
         m.unmarshall(matchings[0])
 
         self.assertEqual(m.pairings[0].attributes, matchings[0]['pairings'][0]['attributes'])
+
+    def test_Dataset(self):
+        with open('testDatasets.json', encoding="utf8") as datasets_file:
+            datasets = json.load(datasets_file)
+
+        d = Dataset()
+        d.unmarshall(datasets[0])
+
+        print(d.properties['test'])
+        #self.assertEqual(m.pairings[0].attributes, datasets[0]['pairings'][0]['attributes'])
 
 
 

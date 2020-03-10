@@ -39,7 +39,11 @@ class DTO:
 
         if isinstance(val, dict):
             logging.debug("value:", val)
-            return cls.unmarshall(val)
+            try:
+                return cls.unmarshall(val)
+            except:
+                # If no class is defined, we add it as a dictionary
+                return val
         else:
             return val
 
