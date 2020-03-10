@@ -3,7 +3,7 @@
 
 
 # Here implement the transformation of the input sets into a list of tuples of strings,
-# using the input transformations
+# using the input transformations. The resulting tuples will be compared and based on their similarity, a
 
 
 # Clean all - _ , . tabs, etc to separate words with just single spaces
@@ -32,7 +32,7 @@ class Preprocessor:
         for tr in transforms:
 
             compare_tuple = []
-            for pr in tr['pairings']:
+            for pr in tr['pairings']:  # TODO add a weight to the tuple
                 # Get dataset of a type, issuer and categories
                 try:
                     st = self.match_set(pr['profile'],
