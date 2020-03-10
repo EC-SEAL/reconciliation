@@ -30,7 +30,7 @@ def damerau_levenshtein(source, target):
     res = textdistance.damerau_levenshtein.normalized_similarity(source, target)
     return res
 
-
+# TODO: improve algorithm
 # jaro-winkler -- NIKOS USES THIS ONE (with 0.7 threshold) AND THE LD (with distance <4) limits distance
 #   of transpositions to half the length, awards to ordered substring, so not good for multiple transpositions
 # Strcmp95 -- this is the original jaro-winkler impl. Why does it appear twice?
