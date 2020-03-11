@@ -1,7 +1,8 @@
 import json
 import unittest
 
-from lib.dto.Dto import DTO
+from lib.Tools import load_json_file
+from lib.dto.Dto import DTO, cast_from_dict, NotDtoClass
 from lib.dto.AttributeMap import AttributeMap
 from lib.dto.Dataset import Dataset
 
@@ -150,8 +151,7 @@ class DtoTest(unittest.TestCase):
         self.assertEqual(expected_str, res_str)
 
     def test_AttributeMap(self):
-        with open('attributeMaps.json', encoding="utf8") as matchings_file:
-            matchings = json.load(matchings_file)
+        matchings = load_json_file('attributeMaps.json')
 
         m = AttributeMap()
         m.unmarshall(matchings[0])
@@ -159,13 +159,30 @@ class DtoTest(unittest.TestCase):
         self.assertEqual(m.pairings[0].attributes, matchings[0]['pairings'][0]['attributes'])
 
     def test_Dataset(self):
-        with open('testDatasets.json', encoding="utf8") as datasets_file:
-            datasets = json.load(datasets_file)
+        datasets = load_json_file('testDatasets.json')
 
         d = Dataset()
         d.unmarshall(datasets[0])
 
         self.assertEqual(d.properties['test'], datasets[0]['properties']['test'])
+
+    def test_caster_works(self):
+        matchings = load_json_file('attributeMaps.json')
+        for mt in matchings:
+            m = cast_from_dict(mt, AttributeMap)
+            self.assertEqual(m.pairings[0].attributes, matchings[0]['pairings'][0]['attributes'])
+
+    def test_no_dto(self):
+
+        class NotDto:
+            def __init__(self):
+                self.test = "test"
+
+        dic = {"test": "test"}
+        with self.assertRaises(NotDtoClass):
+            cast_from_dict(dic, NotDto)
+
+
 
 
 if __name__ == '__main__':

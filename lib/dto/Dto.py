@@ -80,6 +80,20 @@ class DTO:
     def __repr__(self):
         return str(self)
 
+
+def cast_from_dict(dict_object, cast_class):
+    ob = cast_class()
+    try:
+        return ob.unmarshall(dict_object)
+    except:
+        raise NotDtoClass("Casting class can't be marshalled. It must extend DTO")
+
+
+class NotDtoClass(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
 # def json_unmarshall(json_string):
 #     return json.loads(json_string,
 #                            object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))

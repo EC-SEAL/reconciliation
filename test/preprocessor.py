@@ -5,6 +5,7 @@ import unittest
 
 import json
 
+from lib.Tools import load_json_file
 from lib.dto.AttributeMap import AttributeMap
 from lib.dto.Dataset import Dataset
 from lib.preprocessor import Preprocessor, MapDatasetMatchNotFound
@@ -21,18 +22,16 @@ class PreprocessorTest(unittest.TestCase):
     def init_tests(self):
         # Test data sets
         self.datasets = []
-        with open('testDatasets.json', encoding="utf8") as datasets_file:
-            datasets = json.load(datasets_file)
-            for dt in datasets:
-                d = Dataset()
-                self.datasets.append(d.unmarshall(dt))
+        datasets = load_json_file('testDatasets.json')
+        for dt in datasets:
+            d = Dataset()
+            self.datasets.append(d.unmarshall(dt))
 
         self.matchings = []
-        with open('attributeMaps.json', encoding="utf8") as matchings_file:
-            matchings = json.load(matchings_file)
-            for mt in matchings:
-                m = AttributeMap()
-                self.matchings.append(m.unmarshall(mt))
+        matchings = load_json_file('attributeMaps.json')
+        for mt in matchings:
+            m = AttributeMap()
+            self.matchings.append(m.unmarshall(mt))
 
 
     def test_clean_spaces(self):

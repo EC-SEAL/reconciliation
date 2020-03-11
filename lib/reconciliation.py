@@ -7,34 +7,55 @@
 # - compare the strings (loop, 1 call)
 # - return awarded level of similarity for the input sets
 
+
+import json
+
+from lib.dto.AttributeMap import AttributeMap
+from lib.dto.Dataset import Dataset
+from lib.dto.Dto import cast_from_dict
 from lib.preprocessor import Preprocessor
+
 
 class Reconciliation:
 
     def __init__(self):
         self.preprocessor = Preprocessor()
+        self.matchings = None
         pass
 
+    def set_matchings(self, matchings: [dict]):
+        self.matchings = []
+        for mt in matchings:
+            self.matchings.append(cast_from_dict(mt, AttributeMap))
 
+    def set_matchings_from_json(self, matchings: str):
+        self.set_matchings(json.loads(matchings))
 
+    # Return a similarity level for two given datasets
+    def similarity(self, dataset_a: Dataset, dataset_b: Dataset):
 
+        if not isinstance(dataset_a, Dataset) \
+                or not isinstance(dataset_b, Dataset):
+            raise MissingOrBadParams("Passed parameters are not Dataset objects")
 
+        compare_tuples = self.preprocessor.transform(dataset_a,
+                                                     dataset_b,
+                                                     self.matchings)
+        pass
 
     '''
-    
-            with open('testDatasets.json', encoding="utf8") as datasets_file:
-            self.datasets = json.load(datasets_file)
+    self.datasets = load_json_file('testDatasets.json')
+    self.matchings = load_json_file('attributeMaps.json')
 
-        with open('attributeMaps.json', encoding="utf8") as matchings_file:
-            self.matchings = json.load(matchings_file)
 
-    
-        ctuples = p.transform(self.datasets[2],
-                              self.datasets[3],
-                              self.matchings)
     
     
     '''
+
+class MissingOrBadParams(Exception):
+    def __init__(self, message):
+        self.message = message
+
 
 
 # TODO: add accounting logs (INFO)
