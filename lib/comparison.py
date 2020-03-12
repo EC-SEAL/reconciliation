@@ -7,42 +7,25 @@
 #    def compare(self, source, target):
 # Receive 2 strings, return a string similarity rate between 0 and 1
 
-
-import loader
-from lib.comparators.base.comparator import Comparator
-from definitions import COMP_DIR, COMP_ROOT_PACKAGE
-
-
-# Base comparator list. It will be extended on runtime with the comparator libraries
-
-
-# Load the comparator modules, and export a global variable for listing them
-def load_comparators():
-    global comparator_list
-    # Load the comparator modules
-    mods = loader.load_libs(COMP_DIR, COMP_ROOT_PACKAGE)
-    # Merge both lists
-    comparator_list = comparator_list + mods
-    # Remove possible duplicates
-    comparator_list = list(dict.fromkeys(comparator_list))
+from lib.comparators.base.Comparators import Comparators
 
 
 class Comparison:
 
     def __init__(self):
-        self.comparator = case_match()
-        self.comparator_list = []
-        self._load_comparators()
+        self.comparator = None
+        pass
 
-    def list_comparators(self):
-        return self.comparator_list
-
-    # Pass a comparator class name
-    def set_comparator(self, comparator):
+    def set_comparator(self, comparator_name):
+        # Get a reference to the comparator factory singleton
+        comparators = Comparators()
+        if comparator_name not in comparators.list():
+            raise MissingComparatorClass("Class " + comparator_name + " does not exist in comparators dir")
+        comparator = comparators.get(comparator_name)  # TODO: parametrise comparator in properties
         compare_op = getattr(comparator, "compare", None)
         if not callable(compare_op):
-            raise BadClassInterface("Passed object of class " + comparator.__class__ + " does not implement 'compare'")
-        self.comparator = comparator()
+            raise BadClassInterface("Class " + comparator_name + " does not implement 'compare'")
+        self.comparator = comparator
 
     def compare(self, source, target):
         return self.comparator.compare(source, target)
@@ -51,6 +34,12 @@ class Comparison:
 class BadClassInterface(Exception):
     def __init__(self, message):
         self.message = message
+
+
+class MissingComparatorClass(Exception):
+    def __init__(self, message):
+        self.message = message
+
 
 # TODO: improve algorithm
 # jaro-winkler -- NIKOS USES THIS ONE (with 0.7 threshold) AND THE LD (with distance <4) limits distance

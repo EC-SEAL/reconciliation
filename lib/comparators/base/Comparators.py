@@ -1,34 +1,49 @@
 # Singleton that implements a Comparator factory
-from lib.comparators.base.comparator import Comparator
+
+import loader
+from definitions import COMP_DIR
 
 
-class Comparators: # TODO: Seguir implementar singleton factory de comparators
+# Be careful with module shadowing, as I'm not checking if there
+# is another module with the same name already loaded
+class Comparators:
     class __Comparators:
-        def __init__(self, arg):
-            self.val = arg
+        modules = None
+
+        def __init__(self):
+            self.modules = self.load()
+            # Add the two basic builtin comparators
+
         def __str__(self):
-            return repr(self) + self.val
+            return repr(self)
+
+        # Load the comparator modules into the factory
+        def load(self):
+            # Load the comparator modules and write the module names list
+            return loader.load_classes(COMP_DIR, globals())
+
+        def list(self):
+            return self.modules
+
+        def get(self, comparator_name):
+            modname = comparator_name
+            classname = comparator_name
+            module = globals()[modname]
+            class_ = getattr(module, classname)
+            inst = class_()
+            return inst
+
     instance = None
-    def __init__(self, arg):
-        if not OnlyOne.instance:
-            OnlyOne.instance = OnlyOne.__OnlyOne(arg)
-        else:
-            OnlyOne.instance.val = arg
+
+    def __init__(self):
+        if not Comparators.instance:
+            Comparators.instance = self.__Comparators()
+
     def __getattr__(self, name):
         return getattr(self.instance, name)
 
+    def list(self):
+        return self.instance.list()
 
-
-# Boolean string matching. No transformations performed
-class case_match(Comparator):
-    def compare(self, source, target):
-        res = float(source == target)
-        return res
-
-
-# Boolean string matching. Case-insensitive
-class caseless_match(Comparator):
-    def compare(self, source, target):
-        res = float(source.lower() == target.lower())
-        return res
-
+    def get(self, comparator_name):
+        return self.instance.get(comparator_name)

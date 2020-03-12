@@ -10,10 +10,16 @@
 
 import json
 
+from config import config
+from lib.comparison import Comparison
 from lib.dto.AttributeMap import AttributeMap
 from lib.dto.Dataset import Dataset
 from lib.dto.Dto import cast_from_dict
 from lib.preprocessor import Preprocessor
+
+
+# Comparison Algorithm to use
+comparison_alg = config.get('App', 'comparator', fallback="DamerauLevenshtein")
 
 
 class Reconciliation:
@@ -21,7 +27,9 @@ class Reconciliation:
     def __init__(self):
         self.preprocessor = Preprocessor()
         self.matchings = None
-        pass
+        self.comparator = Comparison()
+        self.comparator.set_comparator(comparison_alg)
+
 
     def set_matchings(self, matchings: [dict]):
         self.matchings = []
@@ -38,18 +46,15 @@ class Reconciliation:
                 or not isinstance(dataset_b, Dataset):
             raise MissingOrBadParams("Passed parameters are not Dataset objects")
 
+        # Build the tuple set to compare
         compare_tuples = self.preprocessor.transform(dataset_a,
                                                      dataset_b,
                                                      self.matchings)
 
-    '''
-    self.datasets = load_json_file('testDatasets.json')
-    self.matchings = load_json_file('attributeMaps.json')
+        for ctuple in compare_tuples:
+            pass
 
 
-    
-    
-    '''
 
 class MissingOrBadParams(Exception):
     def __init__(self, message):
