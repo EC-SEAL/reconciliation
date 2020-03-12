@@ -3,20 +3,17 @@
 
 import unittest
 
-import json
-
 from lib.Tools import load_json_file
 from lib.dto.AttributeMap import AttributeMap
 from lib.dto.Dataset import Dataset
 from lib.preprocessor import Preprocessor, MapDatasetMatchNotFound
-import logging
 
 
 class PreprocessorTest(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(PreprocessorTest, self).__init__(*args, **kwargs)
-        #logging.basicConfig(level=logging.DEBUG)
+        # logging.basicConfig(level=logging.DEBUG)
         self.init_tests()
 
     def init_tests(self):
@@ -27,12 +24,11 @@ class PreprocessorTest(unittest.TestCase):
             d = Dataset()
             self.datasets.append(d.unmarshall(dt))
 
-        self.matchings = []
-        matchings = load_json_file('data/attributeMaps.json')
-        for mt in matchings:
+        self.mappings = []
+        mappings = load_json_file('data/attributeMaps.json')
+        for mt in mappings:
             m = AttributeMap()
-            self.matchings.append(m.unmarshall(mt))
-
+            self.mappings.append(m.unmarshall(mt))
 
     def test_clean_spaces(self):
         input_string = "   a  b    c    d "
@@ -93,7 +89,7 @@ class PreprocessorTest(unittest.TestCase):
         p = Preprocessor()
         ctuples = p.transform(self.datasets[0],
                               self.datasets[1],
-                              self.matchings)
+                              self.mappings)
 
         self.assertGreaterEqual(len(ctuples), 1)
         for tp in ctuples:
@@ -103,7 +99,7 @@ class PreprocessorTest(unittest.TestCase):
         p = Preprocessor()
         ctuples = p.transform(self.datasets[2],
                               self.datasets[3],
-                              self.matchings)
+                              self.mappings)
 
         self.assertEqual(len(ctuples), 1)
         self.assertEqual(ctuples[0][0], "ANDREAS PETROU")

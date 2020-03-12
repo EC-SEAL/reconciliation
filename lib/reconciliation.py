@@ -26,18 +26,17 @@ class Reconciliation:
 
     def __init__(self):
         self.preprocessor = Preprocessor()
-        self.matchings = None
+        self.mappings = None
         self.comparator = Comparison()
         self.comparator.set_comparator(comparison_alg)
 
+    def set_mappings(self, mappings: [dict]):
+        self.mappings = []
+        for mt in mappings:
+            self.mappings.append(cast_from_dict(mt, AttributeMap))
 
-    def set_matchings(self, matchings: [dict]):
-        self.matchings = []
-        for mt in matchings:
-            self.matchings.append(cast_from_dict(mt, AttributeMap))
-
-    def set_matchings_from_json(self, matchings: str):
-        self.set_matchings(json.loads(matchings))
+    def set_mappings_from_json(self, mappings: str):
+        self.set_mappings(json.loads(mappings))
 
     # Return a similarity level for two given datasets
     def similarity(self, dataset_a: Dataset, dataset_b: Dataset):
@@ -49,7 +48,7 @@ class Reconciliation:
         # Build the tuple set to compare
         compare_tuples = self.preprocessor.transform(dataset_a,
                                                      dataset_b,
-                                                     self.matchings)
+                                                     self.mappings)
 
         for ctuple in compare_tuples:
             pass

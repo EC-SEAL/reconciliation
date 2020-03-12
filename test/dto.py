@@ -151,12 +151,12 @@ class DtoTest(unittest.TestCase):
         self.assertEqual(expected_str, res_str)
 
     def test_AttributeMap(self):
-        matchings = load_json_file('data/attributeMaps.json')
+        mappings = load_json_file('data/attributeMaps.json')
 
         m = AttributeMap()
-        m.unmarshall(matchings[0])
+        m.unmarshall(mappings[0])
 
-        self.assertEqual(m.pairings[0].attributes, matchings[0]['pairings'][0]['attributes'])
+        self.assertEqual(m.pairings[0].attributes, mappings[0]['pairings'][0]['attributes'])
 
     def test_Dataset(self):
         datasets = load_json_file('data/testDatasets.json')
@@ -167,10 +167,10 @@ class DtoTest(unittest.TestCase):
         self.assertEqual(d.properties['test'], datasets[0]['properties']['test'])
 
     def test_caster_works(self):
-        matchings = load_json_file('data/attributeMaps.json')
-        for mt in matchings:
+        mappings = load_json_file('data/attributeMaps.json')
+        for mt in mappings:
             m = cast_from_dict(mt, AttributeMap)
-            self.assertEqual(m.pairings[0].attributes, matchings[0]['pairings'][0]['attributes'])
+            self.assertEqual(m.pairings[0].attributes, mappings[0]['pairings'][0]['attributes'])
 
     def test_no_dto(self):
 

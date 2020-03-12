@@ -7,7 +7,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_DATA_DIR = "data/"
 
 # List of characters to purge from compare strings
-UNWANTED_CHARS = "-.,;:_·<>+\\/'\\|#@()\"\t\n\r!%&=?¡¿"
+UNWANTED_CHARS = "-.,;:_·<>+\\/'\\|#@()\"\t\n\r!%&=\\\\?¡¿"
 
 # API autoloader root package name
 API_ROOT_PACKAGE = 'api'
