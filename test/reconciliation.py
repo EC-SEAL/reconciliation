@@ -21,15 +21,15 @@ class ReconciliationTests(unittest.TestCase):
         pass
 
     def test_set_matchings(self):
-        arr = load_json_file('attributeMaps.json', encoding='utf8')
+        arr = load_json_file('data/attributeMaps.json', encoding='utf8')
         r = Reconciliation()
         r.set_matchings(arr)
         self.assertIsNotNone(r.matchings)
         self.assertEqual(r.matchings[0].description, arr[0]['description'])
 
     def test_set_matchings_from_str(self):
-        arr = load_json_file('attributeMaps.json', encoding='utf8')
-        with open('attributeMaps.json', encoding='utf8') as json_file:
+        arr = load_json_file('data/attributeMaps.json', encoding='utf8')
+        with open('data/attributeMaps.json', encoding='utf8') as json_file:
             json_str = json_file.read()
         r = Reconciliation()
         r.set_matchings_from_json(json_str)

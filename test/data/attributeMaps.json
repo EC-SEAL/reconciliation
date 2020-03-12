@@ -1,0 +1,32 @@
+[
+  {
+    "description": "eIDAS to eduPerson principal name mapping",
+    "weight": 30,
+    "pairings": [
+      {
+        "profile": "eIDAS",
+        "issuer": null,
+        "categories": [],
+        "attributes": [
+          "$CurrentGivenName",
+          " ",
+          "$FamilyName"
+        ],
+        "regexp": null,
+        "replace": null
+      },
+      {
+        "profile": "eduGAIN",
+        "issuer": null,
+        "categories": [],
+        "attributes": [
+          "$givenName",
+          " ",
+          "$surname"
+        ],
+        "regexp": null,
+        "replace": null
+      }
+    ]
+  }
+]

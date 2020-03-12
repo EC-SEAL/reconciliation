@@ -41,7 +41,6 @@ class Reconciliation:
         compare_tuples = self.preprocessor.transform(dataset_a,
                                                      dataset_b,
                                                      self.matchings)
-        pass
 
     '''
     self.datasets = load_json_file('testDatasets.json')

@@ -1,34 +1,56 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-# Here implement the different comparison methods (factory and classes?) for a pair of strings
+# Factory for the different comparison methods for a pair of strings
+# Supports library loading of additional comparators
+# Classes must implement:
+#    def compare(self, source, target):
 # Receive 2 strings, return a string similarity rate between 0 and 1
 
-import textdistance
+
+import loader
+from lib.comparators.base.comparator import Comparator
+from definitions import COMP_DIR, COMP_ROOT_PACKAGE
 
 
-# Boolean string matching. No transformations performed
-def case_match(source, target):
-    res = float(source == target)
-    return res
+# Base comparator list. It will be extended on runtime with the comparator libraries
 
 
-# Boolean string matching. Case-insensitive
-def caseless_match(source, target):
-    res = float(source.lower() == target.lower())
-    return res
+# Load the comparator modules, and export a global variable for listing them
+def load_comparators():
+    global comparator_list
+    # Load the comparator modules
+    mods = loader.load_libs(COMP_DIR, COMP_ROOT_PACKAGE)
+    # Merge both lists
+    comparator_list = comparator_list + mods
+    # Remove possible duplicates
+    comparator_list = list(dict.fromkeys(comparator_list))
 
 
-# Approximate string matching. Levenshtein Distance
-def levenshtein(source, target):
-    res = textdistance.levenshtein.normalized_similarity(source, target)
-    return res
+class Comparison:
+
+    def __init__(self):
+        self.comparator = case_match()
+        self.comparator_list = []
+        self._load_comparators()
+
+    def list_comparators(self):
+        return self.comparator_list
+
+    # Pass a comparator class name
+    def set_comparator(self, comparator):
+        compare_op = getattr(comparator, "compare", None)
+        if not callable(compare_op):
+            raise BadClassInterface("Passed object of class " + comparator.__class__ + " does not implement 'compare'")
+        self.comparator = comparator()
+
+    def compare(self, source, target):
+        return self.comparator.compare(source, target)
 
 
-# Approximate string matching. Levenshtein Distance with transposition
-def damerau_levenshtein(source, target):
-    res = textdistance.damerau_levenshtein.normalized_similarity(source, target)
-    return res
+class BadClassInterface(Exception):
+    def __init__(self, message):
+        self.message = message
 
 # TODO: improve algorithm
 # jaro-winkler -- NIKOS USES THIS ONE (with 0.7 threshold) AND THE LD (with distance <4) limits distance
@@ -79,14 +101,3 @@ def damerau_levenshtein(source, target):
 
 # Maybe in the end, do as nikos? use an average of LD and jaro-winkler? per token? encapsulate properly and then
 # check with different options
-
-class Comparators:
-
-    def __init__(self):
-        self.comparator = case_match
-
-    def set_comparator(self, comparator):
-        self.comparator = comparator
-
-    def compare(self, source, target):
-        return self.comparator(source, target)

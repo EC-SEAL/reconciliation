@@ -22,13 +22,13 @@ class PreprocessorTest(unittest.TestCase):
     def init_tests(self):
         # Test data sets
         self.datasets = []
-        datasets = load_json_file('testDatasets.json')
+        datasets = load_json_file('data/testDatasets.json')
         for dt in datasets:
             d = Dataset()
             self.datasets.append(d.unmarshall(dt))
 
         self.matchings = []
-        matchings = load_json_file('attributeMaps.json')
+        matchings = load_json_file('data/attributeMaps.json')
         for mt in matchings:
             m = AttributeMap()
             self.matchings.append(m.unmarshall(mt))

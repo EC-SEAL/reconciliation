@@ -2,8 +2,9 @@
 # -*- coding: UTF-8 -*-
 
 from config import config
+from definitions import API_DIR, API_ROOT_PACKAGE
 from engine import app
-import apiloader
+import loader
 import logging
 
 # Read Server configuration
@@ -34,7 +35,8 @@ def hello_world():
 
 
 # Publish the rest of the services defined on the api directory
-apiloader.load_api()
+loader.load_libs(API_DIR, API_ROOT_PACKAGE)
+
 
 # Launch server
 #   to launch in production:
