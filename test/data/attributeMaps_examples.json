@@ -1,6 +1,8 @@
 [
   {
     "description": "eIDAS to eduPerson fake mapping, showing both concatenation and transformation in one side",
+    "weight": 1.0,
+    "processor": "StringProcessor",
     "pairings": [
       {
         "profile": "eIDAS",

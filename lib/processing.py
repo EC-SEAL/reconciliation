@@ -16,18 +16,19 @@ import re
 import logging
 from typing import List
 
+from lib.processors.base.Processors import Processors
 from lib.dto.Dataset import Dataset, Attribute
-from lib.transliteration import Transliteration
-from lib.dto.AttributeMap import AttributeMap, Pairing
-import definitions
+from lib.dto.AttributeMap import AttributeMap
+from lib.dto.CompareTuple import CompareTuple
 
-class Preprocessor:
+
+class Processing:
 
     def __init__(self):
-        self.trans = Transliteration()
+        self.processors = Processors()
         pass
 
-    # Input transfroms are only those relevant for the datasets being compared
+    # Input transformations are only those relevant for the datasets being compared
     def transform(self, set_a: Dataset, set_b: Dataset, transforms: List[AttributeMap]):
         logging.debug("preprocessor.transform")
         logging.debug("Transforms: " + str(transforms))
@@ -38,8 +39,9 @@ class Preprocessor:
         compare_tuples = []
         for transform in transforms:
 
-            compare_tuple = []
-            for pair in transform.pairings:  # TODO add a weight to the tuple
+            compare_tuple = CompareTuple()
+            compare_tuple.weight = transform.weight
+            for pair in transform.pairings:
                 # Get dataset of a type, issuer and categories
                 try:
                     st = self.match_set(pair.profile,
@@ -59,26 +61,26 @@ class Preprocessor:
                         and pair.replace is not None:
                     final_str = re.sub(pair.regexp, pair.replace, final_str)
 
-                # Transliterate to ascii
-                final_str = self.trans.to_ascii(final_str)
+                # If no processor is defined, we default to string
+                proc_type = transform.processor
+                if proc_type not in self.processors.list():
+                    proc_type = "str"
+                processor = self.processors.get(proc_type)
 
-                # Clean useless chars and trim spaces:
-                final_str = self.clean_string(final_str)
-                final_str = self.clean_spaces(final_str)
+                # Process input data according to data type
+                final_str = processor.process(final_str)
 
-                # Uppercase the string
-                final_str = final_str.upper()
-
-                # Add the resulting string to the tuple
-                compare_tuple.append(final_str)
+                # Add the resulting object to the tuple
+                compare_tuple.items.append(final_str)
 
             # If something weird happened, sanitize, log warning and go on
-            if len(compare_tuple) > 2:
+            if len(compare_tuple.items) > 2:
                 logging.warning("A tuple had more than 2 elements. Maps are not precise enough")
-                compare_tuple = (compare_tuple[0], compare_tuple[1])
+                print(compare_tuple)
+                compare_tuple.items = [compare_tuple.items[0], compare_tuple.items[1]]
 
             # Avoid two-empty string comparisons
-            if compare_tuple[0] != "" or compare_tuple[1] != "":
+            if compare_tuple.items[0] != "" or compare_tuple.items[1] != "":
                 compare_tuples.append(compare_tuple)
             else:
                 logging.warning("Both elements in a tuple were empty strings. Maps are not precise enough")
@@ -156,13 +158,6 @@ class Preprocessor:
                 return st
         if not found:
             raise MapDatasetMatchNotFound("Passed datasets do not fulfill the criteria")
-
-    def clean_string(self, input_string):
-        return re.sub("[" + definitions.UNWANTED_CHARS + "]", ' ', input_string)
-
-    def clean_spaces(self, input_string):
-        s = re.sub("\s+", ' ', input_string)
-        return s.strip()
 
 
 class MapDatasetMatchNotFound(Exception):

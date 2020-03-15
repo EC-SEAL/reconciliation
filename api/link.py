@@ -12,7 +12,6 @@ from lib.reconciliation import Reconciliation
 data_dir = config.get('Configuration', 'dir', fallback=DEFAULT_DATA_DIR)
 
 
-
 @app.route('/link/request/submit')
 def submit_linking_request():
 

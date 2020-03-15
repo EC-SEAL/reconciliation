@@ -21,7 +21,7 @@ class Comparison:
         comparators = Comparators()
         if comparator_name not in comparators.list():
             raise MissingComparatorClass("Class " + comparator_name + " does not exist in comparators dir")
-        comparator = comparators.get(comparator_name)  # TODO: parametrise comparator in properties
+        comparator = comparators.get(comparator_name)
         compare_op = getattr(comparator, "compare", None)
         if not callable(compare_op):
             raise BadClassInterface("Class " + comparator_name + " does not implement 'compare'")

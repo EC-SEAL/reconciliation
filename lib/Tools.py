@@ -3,10 +3,12 @@
 
 import os
 import json
+import re
 
 import yaml
+
+import definitions
 from definitions import ROOT_DIR
-from lib.dto.Dto import NotDtoClass
 
 
 def load_json_file(file_path, encoding='utf8'):
@@ -14,7 +16,13 @@ def load_json_file(file_path, encoding='utf8'):
         return json.load(json_file)
 
 
+def clean_string(input_string, unwanted_chars=" "):
+    return re.sub("[" + unwanted_chars + "]", ' ', input_string)
 
+
+def clean_spaces(input_string):
+    s = re.sub("\\s+", ' ', input_string)
+    return s.strip()
 
 
 def get_swagger_spec(spec_filepath):
