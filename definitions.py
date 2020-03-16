@@ -1,5 +1,8 @@
 import os
 
+# Base Properties file path
+PROPERTIES_FILE = "server.properties"
+
 # Application root directory
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 

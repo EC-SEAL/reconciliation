@@ -1,11 +1,12 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-from config import config
+from config import config, config_file_path
 from definitions import API_DIR, API_ROOT_PACKAGE
 from engine import app
 import loader
 import logging
+
 
 # Read Server configuration
 host = config.get('Server', 'host', fallback='localhost')
@@ -26,6 +27,8 @@ logfile = config.get('Log', 'file', fallback=None)
 logging.basicConfig(level=loglevel,
                     format='%(asctime)s %(levelname)s:%(name)s: %(message)s',
                     filename=logfile)
+
+logging.info("Using configuration in " + config_file_path)
 
 
 # Publish root test service
