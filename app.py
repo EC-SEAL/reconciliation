@@ -28,7 +28,7 @@ logging.basicConfig(level=loglevel,
                     format='%(asctime)s %(levelname)s:%(name)s: %(message)s',
                     filename=logfile)
 
-logging.info("Using configuration in " + config_file_path)
+logging.info("Using configuration file in: " + config_file_path)
 
 
 # Publish root test service

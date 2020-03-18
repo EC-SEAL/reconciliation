@@ -1,3 +1,4 @@
+sqlalchemy
 PyYAML
 Flask
 pyopenssl
