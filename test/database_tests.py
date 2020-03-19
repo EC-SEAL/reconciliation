@@ -1,7 +1,5 @@
-import logging
 import unittest
-
-from sqlalchemy.orm import sessionmaker
+import logging
 
 from database import db_engine, DbTable, Request, DbSession
 
@@ -10,7 +8,7 @@ class DatabaseTest(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(DatabaseTest, self).__init__(*args, **kwargs)
-        #logging.basicConfig(level=logging.DEBUG)
+        # logging.basicConfig(level=logging.DEBUG)
         self.init_tests()
 
     def init_tests(self):
@@ -19,6 +17,9 @@ class DatabaseTest(unittest.TestCase):
     def test_memory_database(self):
         # db_debug = True
         db_debug = False
+        # Do NOT ever use memory database on the running server, as flask is
+        # multi-thread and each thread sees a different instance of the database.
+        # Use only for unit tests
         db_path = ':memory:'
         db_driver = 'sqlite'
 

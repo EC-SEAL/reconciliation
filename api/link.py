@@ -9,6 +9,7 @@ from definitions import DEFAULT_DATA_DIR
 from engine import app
 from lib.Tools import load_json_file
 from lib.reconciliation import Reconciliation
+import database
 
 # Config location
 data_dir = config.get('Configuration', 'dir', fallback=DEFAULT_DATA_DIR)
@@ -23,6 +24,23 @@ def submit_linking_request():
     r = Reconciliation()
     r.set_mappings(mappings_dicts)
 
+    # Create a row object
+    req = database.Request(request_id="1234", similarity=1.0, status='SUBMITTED',
+                           dataset_a='aaaaaaaaaaaa', dataset_b='bbbbbbbbb')
+
+# TODO SEGUIR: por alguna razón, cuando voy a usarla, dice que no existe la tabla en la BD. Investigar. Si la
+#  creo aquí, también falla al ir a leer la request.
+    # Create db session
+    session = database.DbSession()
+
+    # Write the object in DB (no flush yet, so not written. If we query, it will flush before query)
+    session.add(req)
+
+    # Issue all the inserts and updates
+    session.commit()
+
+    session.close()
+
     # Parse request, store it on DB, clean expired requests, calculate similarity, update result on db, return
     return 'Hello World! 1'
 
@@ -30,8 +48,13 @@ def submit_linking_request():
 @app.route('/link/<request_id>/status', methods=['GET'])
 def linking_request_status(request_id):
     # Get status in DB, return
-    return 'Hello World status! ' + request_id
 
+    session = database.DbSession()
+    read_req = session.query(database.Request).filter_by(request_id=request_id).first()
+    session.close()
+    # return read_req, 200
+    print(read_req)
+    return "aaaaaa", 200
 
 @app.route('/link/<request_id>/cancel', methods=['POST'])
 def cancel_linking_request(request_id):
@@ -42,9 +65,16 @@ def cancel_linking_request(request_id):
 @app.route('/link/<request_id>/result/get', methods=['POST'])
 def linking_request_result(request_id):
     # Return result and delete from db, return
+
+    session = database.DbSession()
+
+    read_req = session.query(database.Request).filter_by(request_id='1234').first()
+
+    session.close()
     pass
 
 
+# TODO SEGUIR: create linkRequest DTO
 # TODO: integrate httpSig, integrate DB to store request results, implement unit tests on each api function
 
 

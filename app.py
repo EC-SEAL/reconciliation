@@ -6,6 +6,7 @@ from definitions import API_DIR, API_ROOT_PACKAGE
 from engine import app
 import loader
 import logging
+import database
 
 
 # Read Server configuration
@@ -22,6 +23,16 @@ key = config.get('SSL', 'key', fallback=None)
 loglevel = config.get('Log', 'level', fallback=logging.INFO)
 logfile = config.get('Log', 'file', fallback=None)
 
+# Database config
+db_debug = config.getboolean('Database', 'logs', fallback=False)
+db_driver = config.get('Database', 'driver', fallback='sqlite')
+db_dialect = config.get('Database', 'dialect', fallback='')
+db_host = config.get('Database', 'host', fallback='')
+db_port = config.get('Database', 'port', fallback='')
+db_user = config.get('Database', 'user', fallback='')
+db_pass = config.get('Database', 'password', fallback='')
+db_path = config.get('Database', 'path', fallback='data/requests.db')
+
 
 # Setup logger
 logging.basicConfig(level=loglevel,
@@ -29,6 +40,24 @@ logging.basicConfig(level=loglevel,
                     filename=logfile)
 
 logging.info("Using configuration file in: " + config_file_path)
+
+
+# Get database engine
+database_engine = database.db_engine(db_driver, db_path,
+                                     debug=db_debug, dialect=db_dialect,
+                                     host=db_host, port=db_port,
+                                     user=db_user, password=db_pass)
+
+# Bind engine to database session generator
+database.DbSession.configure(bind=database_engine)
+
+# Create (or update) database schema
+database.DbTable.metadata.bind = database_engine
+database.DbTable.metadata.create_all()
+
+
+
+
 
 
 # Publish root test service
