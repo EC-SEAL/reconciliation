@@ -1,63 +1,85 @@
+import base64
 import logging
+import os
+import random
+
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String
-
-from config import config
-
-db_debug = config.getboolean('Database', 'logs', fallback=False)
-db_driver = config.get('Database', 'driver', fallback='sqlite')
-db_dialect = config.get('Database', 'dialect', fallback='')
-db_host = config.get('Database', 'host', fallback='')
-db_port = config.get('Database', 'port', fallback='')
-db_user = config.get('Database', 'user', fallback='')
-db_pass = config.get('Database', 'password', fallback='')
-db_path = config.get('Database', 'path', fallback=':memory:')
+from sqlalchemy import Column, String, Float, Text, Integer, Binary
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy_utils import EncryptedType
+from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 
-def get_db_engine():
-    global db_debug, db_driver, db_dialect, db_host, db_port, db_user, db_pass, db_path
+# from config import config
+#
+# db_debug = config.getboolean('Database', 'logs', fallback=False)
+# db_driver = config.get('Database', 'driver', fallback='sqlite')
+# db_dialect = config.get('Database', 'dialect', fallback='')
+# db_host = config.get('Database', 'host', fallback='')
+# db_port = config.get('Database', 'port', fallback='')
+# db_user = config.get('Database', 'user', fallback='')
+# db_pass = config.get('Database', 'password', fallback='')
+# db_path = config.get('Database', 'path', fallback=':memory:')
 
-    db_dialect_spec = ''
-    if db_dialect != '':
-        db_dialect_spec = '+' + db_dialect
 
-    db_host_spec = ''
-    if db_user != '':
-        db_host_spec = db_user
-        if db_pass != '':
-            db_host_spec = db_host_spec + ':' + db_pass
-        db_host_spec = db_host_spec + '@'
-    if db_host != '':
-        db_host_spec = db_host_spec + db_host
-    if db_port != '':
-        db_host_spec = db_host_spec + ':' + db_port
+def db_engine(driver, path,
+              dialect='', debug=False,
+              host='', port='',
+              user='', password=''):
+    dialect_spec = ''
+    if dialect != '':
+        dialect_spec = '+' + dialect
 
-    connect_string = db_driver + db_dialect_spec + '://' + db_host_spec + '/' + db_path
+    host_spec = ''
+    if user != '':
+        host_spec = user
+        if password != '':
+            host_spec = host_spec + ':' + password
+        host_spec = host_spec + '@'
+    if host != '':
+        host_spec = host_spec + host
+    if port != '':
+        host_spec = host_spec + ':' + port
+
+    connect_string = driver + dialect_spec + '://' + host_spec + '/' + path
     logging.debug("Database connect string: " + connect_string)
 
-    return sqlalchemy.create_engine(connect_string, echo=db_debug)
+    return sqlalchemy.create_engine(connect_string, echo=debug)
 
 
-# Declare base SQLAlchemy declarative class
-Base = declarative_base()
+# Declare session base class
+DbSession = sessionmaker()
 
 
-class Request(Base):
+# Declare base SQLAlchemy declarative class for tables
+DbTable = declarative_base()
+
+
+# Set environment encryption key for database items, or use a random one
+db_enc_key = os.getenv('PROPERTIES_FILE', base64.b64encode(os.urandom(16)))
+# TODO: is this loaded just once or will the key be overwritten?
+# TODO: check if randomness is real in docker, and if real, check if enough, as it might block execution
+
+
+# Database tables
+class Request(DbTable):
     __tablename__ = 'requests'
     id = Column(Integer, primary_key=True)
-    # TODO SEGUIR: create linkRequest DTO, create request table (equivalent or store parts as strings?) . see how to build the schema on the fy and fill it
-    def __repr__(self):
-        return ""#"<User(name='%s', fullname='%s', nickname='%s')>" % (self.name, self.fullname, self.nickname)
+    request_id = Column(String, unique=True)
+    dataset_a = Column(EncryptedType(Text, db_enc_key, AesEngine, 'pkcs5'))
+    dataset_b = Column(EncryptedType(Text, db_enc_key, AesEngine, 'pkcs5'))
+    similarity = Column(Float)
+    status = Column(String)
 
-#     title = Column('title', String(32))
-#     in_stock = Column('in_stock', Boolean)
-#     quantity = Column('quantity', Integer)
-#     price = Column('price', Numeric)
+    def __repr__(self):
+        return "<Request(id='%s', request_id ='%s', similarity='%s'," \
+               " status='%s', dataset_a='%s', dataset_b='%s')>" \
+               % (self.id, self.request_id, self.similarity,
+                  self.status, self.dataset_a, self.dataset_b)
+
+# TODO SEGUIR: create linkRequest DTO, create request table (equivalent or store parts as strings?) . see how to
+#  build the schema on the fy and fill it
 
 
 # TODO: implement database encryption with runtime key creation, reset database on each startup
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    db_debug = True
-    get_db_engine()
