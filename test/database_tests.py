@@ -31,7 +31,7 @@ class DatabaseTest(unittest.TestCase):
         DbTable.metadata.create_all()
 
         # Create a row object
-        req = Request(request_id="1234", similarity=1.0, status='SUBMITTED',
+        req = Request(request_id="1234", request_owner=None, similarity=1.0, status='SUBMITTED',
                       dataset_a='aaaaaaaaaaaa', dataset_b='bbbbbbbbb')
 
         self.assertIsNone(req.id)

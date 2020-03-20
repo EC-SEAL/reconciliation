@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
+from sqlalchemy.exc import OperationalError
 
 from config import config, config_file_path
 from definitions import API_DIR, API_ROOT_PACKAGE
@@ -48,11 +49,19 @@ database_engine = database.db_engine(db_driver, db_path,
                                      host=db_host, port=db_port,
                                      user=db_user, password=db_pass)
 
-# Bind engine to database session generator
+# Bind engine to database session generator and to schema generator
 database.DbSession.configure(bind=database_engine)
+database.DbTable.metadata.bind = database_engine
+
+# Drop the existing database
+try:
+    for tbl in reversed(database.DbTable.metadata.sorted_tables):
+        database_engine.execute(tbl.delete())
+except OperationalError:
+    logging.warning("No tables are dropped")
+
 
 # Create (or update) database schema
-database.DbTable.metadata.bind = database_engine
 database.DbTable.metadata.create_all()
 
 

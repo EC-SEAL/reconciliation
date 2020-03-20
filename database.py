@@ -53,13 +53,15 @@ class Request(DbTable):
     __tablename__ = 'requests'
     id = Column(Integer, primary_key=True)
     request_id = Column(String, unique=True)
+    request_owner = Column(String, nullable=True)
     dataset_a = Column(EncryptedType(Text, db_enc_key, AesEngine, 'pkcs5'))
     dataset_b = Column(EncryptedType(Text, db_enc_key, AesEngine, 'pkcs5'))
-    similarity = Column(Float)
+    similarity = Column(Float, nullable=True)
     status = Column(String)
 
     def __repr__(self):
-        return "<Request(id='%s', request_id ='%s', similarity='%s'," \
-               " status='%s', dataset_a='%s', dataset_b='%s')>" \
-               % (self.id, self.request_id, self.similarity,
+        return "<Request(id='%s', request_id ='%s', request_owner='%s" \
+               "similarity='%s'," " status='%s', " \
+               "dataset_a='%s', dataset_b='%s')>" \
+               % (self.id, self.request_id, self.request_owner, self.similarity,
                   self.status, self.dataset_a, self.dataset_b)

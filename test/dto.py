@@ -5,6 +5,7 @@ from lib.Tools import load_json_file
 from lib.dto.Dto import DTO, cast_from_dict, NotDtoClass
 from lib.dto.AttributeMap import AttributeMap
 from lib.dto.Dataset import Dataset
+from lib.dto.StatusResponse import StatusResponse
 
 
 class Phone(DTO):
