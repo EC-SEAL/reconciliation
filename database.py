@@ -3,7 +3,7 @@ import os
 
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, String, Float, Text, Integer
+from sqlalchemy import Column, String, Float, Text, Integer, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import EncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
@@ -52,6 +52,7 @@ db_enc_key = os.getenv('ENCRYPTION_KEY', ENCRYPTION_KEY)
 class Request(DbTable):
     __tablename__ = 'requests'
     id = Column(Integer, primary_key=True)
+    request_date = Column(DateTime)
     request_id = Column(String, unique=True)
     request_owner = Column(String, nullable=True)
     dataset_a = Column(EncryptedType(Text, db_enc_key, AesEngine, 'pkcs5'))
@@ -60,8 +61,8 @@ class Request(DbTable):
     status = Column(String)
 
     def __repr__(self):
-        return "<Request(id='%s', request_id ='%s', request_owner='%s" \
-               "similarity='%s'," " status='%s', " \
+        return "<Request(id='%s', request_id ='%s', request_owner='%s', " \
+               "request_date='%s', similarity='%s'," " status='%s', " \
                "dataset_a='%s', dataset_b='%s')>" \
-               % (self.id, self.request_id, self.request_owner, self.similarity,
-                  self.status, self.dataset_a, self.dataset_b)
+               % (self.id, self.request_id, self.request_owner, self.request_date,
+                  self.similarity, self.status, self.dataset_a, self.dataset_b)

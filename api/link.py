@@ -1,13 +1,15 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-from flask import Response, jsonify, request
+from flask import Response, request
+from datetime import datetime, timedelta
 import logging
 
 from config import config
 from definitions import DEFAULT_DATA_DIR
 from engine import app
 from lib.Tools import load_json_file
+from lib.dto.LinkRequest import LinkRequest
 from lib.dto.StatusResponse import StatusResponse
 from lib.reconciliation import Reconciliation
 import database
@@ -15,9 +17,20 @@ import database
 # Config location
 data_dir = config.get('Configuration', 'dir', fallback=DEFAULT_DATA_DIR)
 
+# Link Issuer name
+issuer = config.get('App', 'issuer', fallback="")
+
+# Link validity in days
+validity_days = config.getint('App', 'validity_days', fallback="")
+
+# Request lifetime in seconds
+request_lifetime = config.getint('App', 'request_lifetime', fallback="")
+
 
 @app.route('/link/request/submit', methods=['POST'])
 def submit_linking_request():
+    clean_expired()
+
     # Load mappings to apply
     # TODO: for now, load them on each request. Later decide if we load them
     #  on launch time and we add some mechanism for refreshing (or not, just reload service)
@@ -28,13 +41,13 @@ def submit_linking_request():
     # TODO: SEGUIR:
     # - Parse request
     # - Store it on DB (set uuid requestId, status PENDING, similarity null)
-    # - clean expired requests
     # - calculate similarity
     # - update request on db (similarity, status ACCEPTED/REJECT)
     # - return reqId?
 
     # Create a row object
-    req = database.Request(request_id="1234", similarity=1.0, status='SUBMITTED',
+    now = datetime.now()
+    req = database.Request(request_id="1234", similarity=1.0, request_date=now, status='SUBMITTED',
                            dataset_a='aaaaaaaaaaaa', dataset_b='bbbbbbbbb')
 
     session = database.DbSession()
@@ -42,8 +55,9 @@ def submit_linking_request():
     session.commit()
     session.close()
 
-
     return 'Hello World! 1'
+
+
 # TODO: SEGUIR: integrate httpSig (server) or sessionmanager token validation (client) in all calls
 # TODO: implement unit tests on each api function
 
@@ -51,6 +65,8 @@ def submit_linking_request():
 # Get request status in DB
 @app.route('/link/<request_id>/status', methods=['GET'])
 def linking_request_status(request_id):
+    clean_expired()
+
     # TODO: httpsig secured (do we have httpsig server)?
     req = get_request(request_id)
     if not req:
@@ -72,6 +88,8 @@ def linking_request_status(request_id):
 
 @app.route('/link/<request_id>/cancel', methods=['POST'])
 def cancel_linking_request(request_id):
+    clean_expired()
+
     # TODO: msToken secured
     req = get_request(request_id)
     if not req:
@@ -89,6 +107,8 @@ def cancel_linking_request(request_id):
 
 @app.route('/link/<request_id>/result/get', methods=['POST'])
 def linking_request_result(request_id):
+    clean_expired()
+
     # TODO: msToken secured
     req = get_request(request_id)
     if not req:
@@ -97,12 +117,42 @@ def linking_request_result(request_id):
     if not check_owner(request.args.get('sessionToken'), req.request_owner):
         return "Request does not belong to the authenticated user", 403
 
+    if req.status != "ACCEPTED":
+        return "Linking request was not accepted", 403
+
+    # Calculate LLoA from similarity
+    req.similarity  # TODO: add data object with 0-1 thresholds and the lloa levels
+    lloa = "aaa"
+
+    # Calculate expiration date
+    expiration = None
+    if validity_days > 0:
+        expiration = datetime.now() + timedelta(days=validity_days)
+        expiration = expiration.isoformat()
+
+    # Build Response object
+    result = LinkRequest()
+    result.id = req.request_id
+    result.issuer = issuer
+    result.lloa = lloa
+    result.issued = datetime.now().isoformat()
+    result.expiration = expiration
+    result.datasetA = req.dataset_a
+    result.datasetB = req.dataset_b
+    result.evidence = None
+    result.conversation = None
+
+    result_json = result.json_marshall()
+    # TODO: sign the response json string
+
     try:
         delete_request(request_id)
     except RegisterNotFound:
         logging.warning("Can't delete a register. Not found. But I have just red it. Review")
 
-    # TODO: SEGUIR: build linkRequest object con los datos esperados y devolver
+    return Response(result_json,
+                    status=200,
+                    mimetype='application/json')
 
 
 # As this is an automated matching module, there is no interaction with the user,
@@ -176,6 +226,19 @@ def delete_request(request_id):
     session.delete(req)
     session.commit()
     session.close()
+
+
+def clean_expired():
+    threshold = datetime.now() - timedelta(seconds=request_lifetime)
+
+    session = database.DbSession()
+    reqs_to_delete = session.query(database.Request).filter(database.Request.request_date < threshold)
+    for req in reqs_to_delete:
+        session.delete(req)
+    session.commit()
+    session.close()
+
+
 
 
 class RegisterNotFound(Exception):
