@@ -1,11 +1,13 @@
 from lib.dto.Dto import DTO
 
 
-# primaryCode:
-# - PENDING
-# - LOCKED
-# - ACCEPTED
-# - REJECTED
+class StatusCodes:
+    PENDING = "PENDING"
+    LOCKED = "LOCKED"
+    ACCEPTED = "ACCEPTED"
+    REJECTED = "REJECTED"
+
+
 class StatusResponse(DTO):
     def __init__(self):
         self.primaryCode = str

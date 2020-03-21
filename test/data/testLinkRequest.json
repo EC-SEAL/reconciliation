@@ -1,5 +1,13 @@
-[
-  {
+{
+  "id": null,
+  "issuer" : null,
+  "lloa" : null,
+  "issued" : null,
+  "expiration" : null,
+  "evidence" : null,
+  "conversation" : null,
+
+  "datasetA" : {
     "id": "6c0f70a8-f32b-4535-b5f6-0d596c52813a",
     "type": "eIDAS",
     "categories": [],
@@ -64,7 +72,8 @@
       "test": "test value"
     }
   },
-  {
+
+  "datasetB" : {
     "id": "6c0f70a8-f32b-4535-b5f6-0d596c5281aa",
     "type": "eduGAIN",
     "categories": [],
@@ -147,155 +156,5 @@
     ],
     "properties": {}
 
-  },
-  {
-    "id": "6c0f70a8-f32b-4535-b5f6-0d596c5281ac",
-    "type": "eIDAS",
-    "categories": [],
-    "issuerId": "Issuer",
-    "subjectId": "PersonIdentifier",
-    "loa": "4",
-    "issued": "2018-12-06T19:40:16Z",
-    "expiration": "2018-15-06T19:45:16Z",
-    "attributes": [
-      {
-        "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName",
-        "friendlyName": "CurrentGivenName",
-        "encoding": "plain",
-        "language": null,
-        "mandatory": true,
-        "values": [
-          "ΑΝΔΡΕΑΣ",
-          "ANDREAS"
-        ]
-      },
-      {
-        "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName",
-        "friendlyName": "FamilyName",
-        "encoding": "plain",
-        "language": null,
-        "mandatory": true,
-        "values": [
-          "ΠΕΤΡΟΥ",
-          "PETROU"
-        ]
-      },
-      {
-        "name": "http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier",
-        "friendlyName": "PersonIdentifier",
-        "encoding": "plain",
-        "language": null,
-        "mandatory": true,
-        "values": [
-          "GR/ES/ERMIS-11076669"
-        ]
-      },
-      {
-        "name": "http://eidas.europa.eu/attributes/naturalperson/DateOfBirth",
-        "friendlyName": "DateOfBirth",
-        "encoding": "plain",
-        "language": null,
-        "mandatory": true,
-        "values": [
-          "1980-01-01"
-        ]
-      },
-      {
-        "name": "Issuer",
-        "friendlyName": "Issuer",
-        "encoding": "plain",
-        "language": null,
-        "mandatory": true,
-        "values": [
-          "https://www.ermis.gov.gr/ermis-eidas-idp/metadata"
-        ]
-      }
-    ],
-    "properties": {}
-  },
-  {
-    "id": "6c0f70a8-f32b-4535-b5f6-0d596c52813g",
-    "type": "eduGAIN",
-    "categories": [],
-    "issuerId": "Issuer",
-    "subjectId": "eduPersonTargetedID",
-    "loa": "4",
-    "issued": "2018-12-06T19:40:16Z",
-    "expiration": "2018-15-06T19:45:16Z",
-    "attributes": [
-      {
-        "name": "displayName",
-        "friendlyName": null,
-        "encoding": "plain",
-        "language": null,
-        "mandatory": true,
-        "values": [
-          "Andreas Petro"
-        ]
-      },
-      {
-        "name": "schacHomeOrganization",
-        "friendlyName": null,
-        "encoding": "plain",
-        "language": null,
-        "mandatory": true,
-        "values": [
-          "uaegean.gr"
-        ]
-      },
-      {
-        "name": "givenName",
-        "friendlyName": null,
-        "encoding": "plain",
-        "language": null,
-        "mandatory": true,
-        "values": [
-          "Andreas"
-        ]
-      },
-      {
-        "name": "surname",
-        "friendlyName": null,
-        "encoding": "plain",
-        "language": null,
-        "mandatory": true,
-        "values": [
-          "Petro"
-        ]
-      },
-      {
-        "name": "commonName",
-        "friendlyName": null,
-        "encoding": "plain",
-        "language": null,
-        "mandatory": true,
-        "values": [
-          "Andreas Petro"
-        ]
-      },
-      {
-        "name": "eduPersonTargetedID",
-        "friendlyName": "eduPersonTargetedID",
-        "encoding": "plain",
-        "language": null,
-        "mandatory": true,
-        "values": [
-          "22aba767da7237d8e8b75f27a8fb56a4"
-        ]
-      },
-      {
-        "name": "Issuer",
-        "friendlyName": "Issuer",
-        "encoding": "plain",
-        "language": null,
-        "mandatory": true,
-        "values": [
-          "https://idp.uaegean.gr/module.php/saml2/idp/metadata.xml"
-        ]
-      }
-    ],
-    "properties": {}
   }
-
-]
-
+}

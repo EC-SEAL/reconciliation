@@ -5,6 +5,7 @@ from lib.Tools import load_json_file
 from lib.dto.Dto import DTO, cast_from_dict, NotDtoClass
 from lib.dto.AttributeMap import AttributeMap
 from lib.dto.Dataset import Dataset
+from lib.dto.LinkRequest import LinkRequest
 from lib.dto.StatusResponse import StatusResponse
 
 
@@ -167,6 +168,14 @@ class DtoTest(unittest.TestCase):
 
         self.assertEqual(d.properties['test'], datasets[0]['properties']['test'])
 
+    def test_LinkRequest(self):
+        lreq = load_json_file('data/testLinkRequest.json')
+
+        r = LinkRequest()
+        r.unmarshall(lreq)
+
+        self.assertEqual(r.datasetA.properties['test'], lreq['datasetA']['properties']['test'])
+
     def test_caster_works(self):
         mappings = load_json_file('data/attributeMaps.json')
         for mt in mappings:
@@ -183,7 +192,11 @@ class DtoTest(unittest.TestCase):
         with self.assertRaises(NotDtoClass):
             cast_from_dict(dic, NotDto)
 
-
+    def test_unmarshall_marshall(self):
+        datasets = load_json_file('data/testDatasets.json')
+        d = Dataset()
+        d.unmarshall(datasets[0])
+        d.json_marshall()
 
 
 if __name__ == '__main__':

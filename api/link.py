@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
+import uuid
 
 from flask import Response, request
 from datetime import datetime, timedelta
@@ -10,7 +11,7 @@ from definitions import DEFAULT_DATA_DIR
 from engine import app
 from lib.Tools import load_json_file
 from lib.dto.LinkRequest import LinkRequest
-from lib.dto.StatusResponse import StatusResponse
+from lib.dto.StatusResponse import StatusResponse, StatusCodes
 from lib.reconciliation import Reconciliation
 import database
 
@@ -26,40 +27,77 @@ validity_days = config.getint('App', 'validity_days', fallback="")
 # Request lifetime in seconds
 request_lifetime = config.getint('App', 'request_lifetime', fallback="")
 
+# Similarity threshold to consider a request accepted
+acceptance_threshold = config.getfloat('App', 'acceptance_threshold', fallback="")
+
+# Which LLoA will have the resulting link if accepted
+lloa = config.get('App', 'lloa', fallback="low")
+
 
 @app.route('/link/request/submit', methods=['POST'])
 def submit_linking_request():
     clean_expired()
 
+    # TODO: check msToken against SM
+    if 'msToken' not in request.form:
+        return "missing msToken POST parameter or bad content-type", 404
+    msToken = request.form['msToken']
+
     # Load mappings to apply
-    # TODO: for now, load them on each request. Later decide if we load them
-    #  on launch time and we add some mechanism for refreshing (or not, just reload service)
+    # TODO: for now, load on each request. Later decide if we load on launch time with refreshing (or not)
     mappings_dicts = load_json_file(data_dir + 'attributeMaps.json')
-    r = Reconciliation()
-    r.set_mappings(mappings_dicts)
+    reconciliation = Reconciliation()
+    reconciliation.set_mappings(mappings_dicts)
 
-    # TODO: SEGUIR:
-    # - Parse request
-    # - Store it on DB (set uuid requestId, status PENDING, similarity null)
-    # - calculate similarity
-    # - update request on db (similarity, status ACCEPTED/REJECT)
-    # - return reqId?
+    # Parse input request
+    link_req = load_json_file('test/data/testLinkRequest.json')
+    # TODO: Now we read from file, later we read from SM 'request' var
+    req = LinkRequest()
+    req.unmarshall(link_req)
 
-    # Create a row object
     now = datetime.now()
-    req = database.Request(request_id="1234", similarity=1.0, request_date=now, status='SUBMITTED',
-                           dataset_a='aaaaaaaaaaaa', dataset_b='bbbbbbbbb')
 
+    request_id = str(uuid.uuid4())
+    request_id = "1234"  # TODO remove
+
+    # Create a database row object
+    db_req = database.Request(request_id=request_id, request_date=now,
+                              status=StatusCodes.PENDING,
+                              dataset_a=req.datasetA.json_marshall(),
+                              dataset_b=req.datasetB.json_marshall())
+
+    # Store it on DB
     session = database.DbSession()
-    session.add(req)
+    session.add(db_req)
+    session.commit()
+
+    # Calculate similarity
+    similarity = reconciliation.similarity(req.datasetA, req.datasetB)
+
+    # Update request with the LLoA and the acceptance status
+    if similarity >= acceptance_threshold:
+        db_req.status = StatusCodes.ACCEPTED
+    else:
+        db_req.status = StatusCodes.REJECTED
+
+    session.add(db_req)
     session.commit()
     session.close()
 
-    return 'Hello World! 1'
+    # Fill in the requestID and return the request object
+    req.id = request_id
+    request_json = req.json_marshall()
+
+    # TODO: Also, overwrite it in SM session
+
+    return Response(request_json,
+                    status=200,
+                    mimetype='application/json')
 
 
 # TODO: SEGUIR: integrate httpSig (server) or sessionmanager token validation (client) in all calls
-# TODO: implement unit tests on each api function
+# TODO: implement a session manager access library
+# TODO: implement unit tests on each api function (see to mockup the SM, try to redefine the lib with a mockup)
 
 
 # Get request status in DB
@@ -67,7 +105,8 @@ def submit_linking_request():
 def linking_request_status(request_id):
     clean_expired()
 
-    # TODO: httpsig secured (do we have httpsig server)?
+    # TODO: httpsig secured? (do we have httpsig server)?
+
     req = get_request(request_id)
     if not req:
         return "Request ID not found", 403
@@ -90,7 +129,11 @@ def linking_request_status(request_id):
 def cancel_linking_request(request_id):
     clean_expired()
 
-    # TODO: msToken secured
+    # TODO: check msToken against SM
+    if 'msToken' not in request.form:
+        return "missing msToken POST parameter or bad content-type", 404
+    msToken = request.form['msToken']
+
     req = get_request(request_id)
     if not req:
         return "Request ID not found", 403
@@ -109,7 +152,11 @@ def cancel_linking_request(request_id):
 def linking_request_result(request_id):
     clean_expired()
 
-    # TODO: msToken secured
+    # TODO: check msToken against SM
+    if 'msToken' not in request.form:
+        return "missing msToken POST parameter or bad content-type", 404
+    msToken = request.form['msToken']
+
     req = get_request(request_id)
     if not req:
         return "Request ID not found", 403
@@ -119,10 +166,6 @@ def linking_request_result(request_id):
 
     if req.status != "ACCEPTED":
         return "Linking request was not accepted", 403
-
-    # Calculate LLoA from similarity
-    req.similarity  # TODO: add data object with 0-1 thresholds and the lloa levels
-    lloa = "aaa"
 
     # Calculate expiration date
     expiration = None
@@ -148,7 +191,7 @@ def linking_request_result(request_id):
     try:
         delete_request(request_id)
     except RegisterNotFound:
-        logging.warning("Can't delete a register. Not found. But I have just red it. Review")
+        logging.warning("This should not happen. Can't delete a register I have just read")
 
     return Response(result_json,
                     status=200,
@@ -237,8 +280,6 @@ def clean_expired():
         session.delete(req)
     session.commit()
     session.close()
-
-
 
 
 class RegisterNotFound(Exception):
