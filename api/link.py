@@ -10,6 +10,7 @@ from config import config
 from definitions import DEFAULT_DATA_DIR
 from engine import app
 from lib.Tools import load_json_file
+from lib.dto.Dataset import Dataset
 from lib.dto.LinkRequest import LinkRequest
 from lib.dto.StatusResponse import StatusResponse, StatusCodes
 from lib.reconciliation import Reconciliation
@@ -73,6 +74,7 @@ def submit_linking_request():
 
     # Calculate similarity
     similarity = reconciliation.similarity(req.datasetA, req.datasetB)
+    db_req.similarity = similarity
 
     # Update request with the LLoA and the acceptance status
     if similarity >= acceptance_threshold:
@@ -174,14 +176,19 @@ def linking_request_result(request_id):
         expiration = expiration.isoformat()
 
     # Build Response object
+    datasetA = Dataset()
+    datasetA.json_unmarshall(req.dataset_a)
+    datasetB = Dataset()
+    datasetB.json_unmarshall(req.dataset_b)
+
     result = LinkRequest()
     result.id = req.request_id
     result.issuer = issuer
     result.lloa = lloa
     result.issued = datetime.now().isoformat()
     result.expiration = expiration
-    result.datasetA = req.dataset_a
-    result.datasetB = req.dataset_b
+    result.datasetA = datasetA
+    result.datasetB = datasetB
     result.evidence = None
     result.conversation = None
 

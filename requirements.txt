@@ -9,3 +9,4 @@ textdistance[extras]
 transliterate
 dateparser
 bravado-core
+httpsig
