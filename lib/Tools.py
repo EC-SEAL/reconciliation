@@ -1,13 +1,16 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-
+import base64
+import hashlib
 import os
 import json
 import re
+import time
+from requests import Request
+
 
 import yaml
 
-import definitions
 from definitions import ROOT_DIR
 
 
@@ -23,6 +26,31 @@ def clean_string(input_string, unwanted_chars=" "):
 def clean_spaces(input_string):
     s = re.sub("\\s+", ' ', input_string)
     return s.strip()
+
+
+def sha256_fingerprint(key_pem):
+    key_pem = re.sub('[-]+BEGIN PUBLIC KEY[-]+', '', key_pem)
+    key_pem = re.sub('[-]+END PUBLIC KEY[-]+', '', key_pem)
+    key_pem = key_pem.strip()
+    key_pem = key_pem.replace("\n\r", '')
+    key_pem = key_pem.replace("\n", '')
+    key_pem = key_pem.replace("\r", '')
+
+    key_bin = base64.b64decode(key_pem)
+    return hashlib.sha256(key_bin).hexdigest()
+
+
+def gmt_time():
+    return time.strftime("%a, %d %b %Y %H:%M:%S GMT", time.gmtime())
+
+
+def pretty_print_http(req: Request):
+    print('{}\n{}\n{}\n\n{}'.format(
+        '-----------BEGIN REQUEST-----------',
+        req.method + ' ' + req.url,
+        '\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items()),
+        req.body,
+    ))
 
 
 def get_swagger_spec(spec_filepath):

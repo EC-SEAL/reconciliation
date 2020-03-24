@@ -6,7 +6,7 @@ class ApiConnectionType:
     GET = 'get'
 
 
-class LinkRequest(DTO):
+class MsMetadata(DTO):
     def __init__(self):
         self.msId = str
         self.authorisedMicroservices = [str]

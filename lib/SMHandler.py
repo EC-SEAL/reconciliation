@@ -2,10 +2,21 @@ import json
 import logging
 from urllib.parse import urlencode
 
+from config import config
 from lib.dto import MsMetadata
 from lib.dto.SessionMngrResponse import SessionMngrCode
 from lib.httpsig.HttpSigClient import HttpSigClient
 
+
+#TODO: try to move these up later
+# Private RSA key to use
+httpsig_private_key = config.get('HTTPSig', 'private_key')
+
+# Identifier of the entity (usually the SHA256 hex-encoded fingerprint of the key)
+httpsig_key_id = config.get('HTTPSig', 'key_id', fallback=None)
+
+# As SM sometimes fails to validate signature, we retry the connection for resilience
+httpsig_send_retries = config.getint('HTTPSig', 'retries', fallback=1)
 
 class EndpointNotFound(object):
     def __init__(self, message):
@@ -27,7 +38,7 @@ class SMHandler:
         # Metadata of the Session Manager microservice
         self.smMetadata = smMetadata
         # HTTPSig client instance
-        self.httpsig = HttpSigClient(metadata, smMetadata)
+        self.httpsig = HttpSigClient(httpsig_private_key, key_id=httpsig_key_id, retries=httpsig_send_retries)
 
     def getSessID(self):
         return self.sessId

@@ -97,8 +97,9 @@ def submit_linking_request():
                     mimetype='application/json')
 
 
-# TODO: SEGUIR: integrate httpSig (server) or sessionmanager token validation (client) in all calls
-# TODO: implement a session manager access library
+# TODO: SEGUIR: integrate httpsig lib to build a client and a server lib
+# TODO: implement a session manager access library -> do the unit tests
+# TODO: integrate httpSig (server) or sessionmanager token validation (client) in all calls
 # TODO: implement unit tests on each api function (see to mockup the SM, try to redefine the lib with a mockup)
 
 

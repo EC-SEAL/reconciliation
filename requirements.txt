@@ -1,3 +1,5 @@
+Crypto
+requests
 sqlalchemy
 sqlalchemy_utils
 PyYAML
@@ -10,3 +12,4 @@ transliterate
 dateparser
 bravado-core
 httpsig
+requests-http-signature
