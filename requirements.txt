@@ -11,5 +11,5 @@ textdistance[extras]
 transliterate
 dateparser
 bravado-core
-httpsig
+# httpsig  # This lib does not calculate and sign the digest of the body
 requests-http-signature

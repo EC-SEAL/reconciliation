@@ -43,9 +43,16 @@ class HttpSigTest(unittest.TestCase):
                         'Z1Fd4eevfzE1QqNJSQIDAQAB']
         c = HttpSigClient(key, trusted_keys)
 
-
+        # This works
         body = "aaa=bbb".encode('utf-8')
         hashlib.sha256(body)
 
+
+        data = {"aaa": "bbb4", "ccc": "ddd ffff"}
+        raw_form = b"aaa=bbb1&ccc=ddd"
+
         # c.get("http://lab9054.inv.uji.es/")
-        c.get("http://stork.uji.es/")
+        # c.get("http://stork.uji.es/")
+        #c.get("http://lab9054.inv.uji.es/aa.php?jjj=iii")
+        c.postForm("http://lab9054.inv.uji.es/aa.php", c.dict_to_form(data))
+        #c.postJson("http://lab9054.inv.uji.es/aa.php", data)
