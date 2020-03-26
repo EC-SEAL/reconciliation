@@ -26,7 +26,6 @@ class HttpConnectError(Exception):
 
 
 class HttpSigClient:
-
     class Method:
         GET = 'GET'
         POST = 'POST'
@@ -39,15 +38,16 @@ class HttpSigClient:
         SHA256 = 'sha256'
         RSA_SHA256 = 'rsa-sha256'
 
-    def __init__(self, private_key, trusted_keys: [], key_id=None, retries=1):
-
+    def __init__(self, private_key, trusted_keys: {}, key_id=None, retries=1):
+        self.do_debug = False
+        self.validate_response = True
         self.algorithm = self.Algorithm.RSA_SHA256
 
         # Private RSA key PEM
         with open(private_key, 'rb') as keyfile:
             self.privkey = keyfile.read()
 
-        # List of trusted public keys
+        # Dictionary of trusted public keys, key_id:public_key_b64
         self.trusted_keys = trusted_keys
 
         # HTTP Send retries
@@ -62,11 +62,17 @@ class HttpSigClient:
         if not self.key_id:
             self.key_id = sha256_fingerprint(self.pubkey)
 
+    def debug(self, debug):
+        self.do_debug = debug
+
+    def validateResponse(self, validate):
+        self.validate_response = validate
+
     # We need this because the requests httpsig auth module fails to encode
     # properly the data dict when hashing (works fine for json), so we need to
     # build the form body byte string and pass it like that (also, we need to
     # establish the content-type)
-    def dict_to_form(self, post_params: dict):
+    def urlencode(self, post_params: dict):
         return urllib.parse.urlencode(post_params).encode('utf-8')
 
     def get(self, url, timeout=None):
@@ -86,8 +92,7 @@ class HttpSigClient:
                 return self.send(method, url, body, content_type, timeout)
             except Exception as ex:
                 logging.warning('HTTPSig client returned error (retries left: '
-                                + str(self.retries - i) + '): ' + str(ex.__traceback__))
-                # TODO: add the error message to the log
+                                + str(self.retries - i) + '): ' + str(ex))
                 raise ex
 
     def send(self, method, url, body=None, content_type=None, timeout=None):
@@ -117,11 +122,11 @@ class HttpSigClient:
             'url': url,
             'auth': auth,
             'headers': headers,
-            'timeout': timeout,
         }
 
         if timeout:
-            args['timeout'] = timeout
+            if not self.do_debug:
+                args['timeout'] = timeout
         if method == self.Method.POST:
             # Set the content type
             headers['Content-Type'] = content_type
@@ -129,20 +134,24 @@ class HttpSigClient:
             if content_type == self.ContentType.JSON:
                 args['json'] = body
             if content_type == self.ContentType.FORM:
-                args['data'] = body  # b"aaa=bbb"  # TODO implement dict to query str
+                args['data'] = self.urlencode(body)
 
         http_resp = None
         try:
-            http_resp = requests.request(**args)
-
-            # TODO: Validate response signature
-
+            http_resp = self.request(**args)
         except ValueError as e:
             logging.warning(f'HTTPSig client error: {e}')
             raise HttpConnectError(f'HTTPSig client error: {e}')
         except Timeout:
             logging.warning(f'HTTPSig request to {url} timed out')
             raise HttpConnectError(f'HTTPSig client timed out')
+
+        # TODO: I guess the same validation function can be used over responses.
+        #  Try to check with a server signing the responses. Maybe I need the other lib
+        #  to do the raw signing of the response? In that case, maybe I need another lib
+        #  to implement the digest (or DIY)
+        if self.validate_response:
+            HTTPSignatureAuth.verify(http_resp, key_resolver=self.trusted_keys_resolver)
 
         if not http_resp:
             raise HttpError(f"Received error code {http_resp.status_code} when connecting to {url}")
@@ -155,6 +164,32 @@ class HttpSigClient:
             ret = http_resp.text  # Returns string of the content (in the incoming encoding)
 
         return ret
+
+    def request(self, **kwargs):
+        # Production requests
+        if not self.do_debug:
+            return requests.request(**kwargs)
+        # Debug requests
+        raw = requests.Request(**kwargs)
+        prepared = raw.prepare()
+        self.pretty_print_post(prepared)
+        s = requests.Session()
+        res = s.send(prepared)
+        s.close()
+        return res
+
+    # log the raw HTTP Request
+    def pretty_print_post(self, req):
+        req_row = req.method + ' ' + req.url
+        headers = '\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items())
+        body = req.body or ""
+        logging.debug('-------HTTP REQUEST-------\n' + f'{req_row}\n{headers}\n\n{body}')
+
+    # for a given key_id, returns the public key that must be used to verify a signature
+    def trusted_keys_resolver(self, key_id, algorithm):
+        if key_id not in self.trusted_keys:
+            return None
+        return self.trusted_keys[key_id]
 
 
 '''
@@ -193,4 +228,3 @@ authClient = requests.request(method, "http://lab9054.inv.uji.es/aa.php", auth=a
 # Implementar validador? probar contra SM? primero param,wtrizar bien, para que se añada el content type y
 # se contruya el body como toca. Probar tb con la otra librería a ver si manda el digest o no, Si lo manda, jusar la otra
 '''
-

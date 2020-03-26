@@ -37,10 +37,11 @@ class HttpSigTest(unittest.TestCase):
     def test_get(self):
         key = 'data/httpsig_key.pem'
         fingerprint = '58f20aef58f63c28d95a57e5e7dd3e6971122ce35b5448acf36818874a0b2c0c'
-        trusted_keys = ['MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJBbbirvao04+n3R0rvX2Mbq+J' +
-                        'JyEl06K6hWf4MarVi6YTuJWWQb3D0mkWLATBchAntTsQsj+TH8VLkVIP3YWuOeT9' +
-                        '49AmfGQ1lM5FTzYmyh5wl6n1v/k7CGKqkm/WLRZD94HJE+FDhJ+ERy4/nF54n6ex' +
-                        'Z1Fd4eevfzE1QqNJSQIDAQAB']
+        trusted_keys = {'58f20aef58f63c28d95a57e5e7dd3e6971122ce35b5448acf36818874a0b2c0c':
+                            'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJBbbirvao04+n3R0rvX2Mbq+J' +
+                            'JyEl06K6hWf4MarVi6YTuJWWQb3D0mkWLATBchAntTsQsj+TH8VLkVIP3YWuOeT9' +
+                            '49AmfGQ1lM5FTzYmyh5wl6n1v/k7CGKqkm/WLRZD94HJE+FDhJ+ERy4/nF54n6ex' +
+                            'Z1Fd4eevfzE1QqNJSQIDAQAB'}
         c = HttpSigClient(key, trusted_keys)
 
         # This works
@@ -50,9 +51,11 @@ class HttpSigTest(unittest.TestCase):
 
         data = {"aaa": "bbb4", "ccc": "ddd ffff"}
         raw_form = b"aaa=bbb1&ccc=ddd"
-
-        # c.get("http://lab9054.inv.uji.es/")
+        c.debug(True)
+        c.validateResponse(False)
+        #c.get("http://lab9054.inv.uji.es/")
         # c.get("http://stork.uji.es/")
-        #c.get("http://lab9054.inv.uji.es/aa.php?jjj=iii")
-        c.postForm("http://lab9054.inv.uji.es/aa.php", c.dict_to_form(data))
+        c.get("http://lab9054.inv.uji.es/aa.php?jjj=iii")
+        # c.postForm("http://lab9054.inv.uji.es/aa.php", raw_form)
+        #c.postForm("http://lab9054.inv.uji.es/aa.php?jjj=iii", data)
         #c.postJson("http://lab9054.inv.uji.es/aa.php", data)
