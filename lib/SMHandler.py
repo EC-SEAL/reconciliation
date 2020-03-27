@@ -2,21 +2,11 @@ import json
 import logging
 from urllib.parse import urlencode
 
-from config import config
+from lib import Tools
 from lib.dto import MsMetadata
-from lib.dto.SessionMngrResponse import SessionMngrCode
+from lib.dto.SessionMngrResponse import SessionMngrCode, SessionMngrResponse
 from lib.httpsig.HttpSigClient import HttpSigClient
 
-
-#TODO: try to move these up later
-# Private RSA key to use
-httpsig_private_key = config.get('HTTPSig', 'private_key')
-
-# Identifier of the entity (usually the SHA256 hex-encoded fingerprint of the key)
-httpsig_key_id = config.get('HTTPSig', 'key_id', fallback=None)
-
-# As SM sometimes fails to validate signature, we retry the connection for resilience
-httpsig_send_retries = config.getint('HTTPSig', 'retries', fallback=1)
 
 class EndpointNotFound(object):
     def __init__(self, message):
@@ -30,15 +20,25 @@ class SessionManagerError(object):
 
 class SMHandler:
 
-    def __init__(self, metadata: MsMetadata, smMetadata: MsMetadata):
+    def __init__(self, smMetadata: MsMetadata, key, key_id=None, retries=1, validate=True):
         # Session Identifier
         self.sessId = None
-        # Metadata of this microservice
-        self.metadata = metadata
+        # Key ID of this client
+        self.key_id = key_id
+        # Key of this client
+        self.key = key
+        # Send retries
+        self.retries = retries
         # Metadata of the Session Manager microservice
         self.smMetadata = smMetadata
+
+        trusted_keys = {Tools.sha256_fingerprint(smMetadata.rsaPublicKeyBinary): smMetadata.rsaPublicKeyBinary}
+
         # HTTPSig client instance
-        self.httpsig = HttpSigClient(httpsig_private_key, key_id=httpsig_key_id, retries=httpsig_send_retries)
+        self.httpsig = HttpSigClient(self.key, trusted_keys,
+                                     key_id=self.key_id, retries=self.retries)
+
+        self.httpsig.validateResponse(validate)
 
     def getSessID(self):
         return self.sessId
@@ -57,6 +57,7 @@ class SMHandler:
     def startSession(self):
         url = self._getApiUrl('SM', 'startSession')
         res = self.httpsig.postForm(url)
+        res = SessionMngrResponse().unmarshall(res)
 
         if res.code == SessionMngrCode.ERROR:
             raise SessionManagerError("Session start failed: " + res.error)
@@ -68,9 +69,9 @@ class SMHandler:
         return self.sessId
 
     def getSession(self, variable, value):
+        logging.debug('Requesting session variable (None means whole session object):' + variable)
         url = self._getApiUrl('SM', 'getSession')
         url = url + "?" + urlencode({'varName': variable, 'varValue': value})
-        body = "{}"
 
         res = self.httpsig.get(url)
 
@@ -81,7 +82,6 @@ class SMHandler:
     def endSession(self):
         url = self._getApiUrl('SM', 'endSession')
         url = url + "?" + urlencode({'sessionId': self.sessId})
-        body = "{}"
 
         res = self.httpsig.get(url)
 
@@ -129,9 +129,11 @@ class SMHandler:
         if not json_value:
             raise SessionManagerError("Error encoding value of var name in json: " + value)
 
-        body = '{' + '"sessionId": "' + urlencode(self.sessId) + '",' + \
-               '"variableName": "' + name + '",' + \
-               '"dataObject": ' + json_value + '}'
+        body = '{' + \
+               f'"sessionId": "{self.sessId}",' + \
+               f'"variableName": "{name}",' + \
+               f'"dataObject": {json_value}' + \
+               '}'
 
         url = self._getApiUrl('SM', 'updateSessionData')
 

@@ -12,7 +12,7 @@ class HttpSigTest(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(HttpSigTest, self).__init__(*args, **kwargs)
-        logging.basicConfig(level=logging.DEBUG)
+        # logging.basicConfig(level=logging.DEBUG)
         requests_log = logging.getLogger("requests.packages.urllib3")
         requests_log.setLevel(logging.DEBUG)
         requests_log.propagate = True
@@ -51,11 +51,16 @@ class HttpSigTest(unittest.TestCase):
 
         data = {"aaa": "bbb4", "ccc": "ddd ffff"}
         raw_form = b"aaa=bbb1&ccc=ddd"
-        c.debug(True)
+        # c.debug(True)
         c.validateResponse(False)
-        #c.get("http://lab9054.inv.uji.es/")
+        # c.get("http://lab9054.inv.uji.es/")
         # c.get("http://stork.uji.es/")
-        c.get("http://lab9054.inv.uji.es/aa.php?jjj=iii")
+        # c.get("http://lab9054.inv.uji.es/aa.php?jjj=iii")
         # c.postForm("http://lab9054.inv.uji.es/aa.php", raw_form)
-        #c.postForm("http://lab9054.inv.uji.es/aa.php?jjj=iii", data)
-        #c.postJson("http://lab9054.inv.uji.es/aa.php", data)
+        # c.postForm("http://lab9054.inv.uji.es/aa.php?jjj=iii", data)
+        # c.postJson("http://lab9054.inv.uji.es/aa.php", data)
+        c.get("https://www.google.com/")
+        c.postForm("http://lab9054.inv.uji.es/aa.php")
+
+        # TODO: SEGUIR implement better tests. then implement server part on the api as a decorator
+        #  (and the SM mstoken validation, also as a decorator)

@@ -9,9 +9,11 @@ import logging
 from config import config
 from definitions import DEFAULT_DATA_DIR
 from engine import app
+from lib.CMHandler import CMHandler
 from lib.Tools import load_json_file
 from lib.dto.Dataset import Dataset
 from lib.dto.LinkRequest import LinkRequest
+from lib.dto.MsMetadata import MsMetadata
 from lib.dto.StatusResponse import StatusResponse, StatusCodes
 from lib.reconciliation import Reconciliation
 import database
@@ -33,6 +35,24 @@ acceptance_threshold = config.getfloat('App', 'acceptance_threshold', fallback="
 
 # Which LLoA will have the resulting link if accepted
 lloa = config.get('App', 'lloa', fallback="low")
+
+# Private RSA key to use
+httpsig_private_key = config.get('HTTPSig', 'private_key')
+
+# Identifier of the entity (usually the SHA256 hex-encoded fingerprint of the key)
+httpsig_key_id = config.get('HTTPSig', 'key_id', fallback=None)
+
+# As SM sometimes fails to validate signature, we retry the connection for resilience
+httpsig_send_retries = config.getint('HTTPSig', 'retries', fallback=1)
+
+
+
+
+def session_manager():
+    cm = CMHandler(data_dir + 'msMetadataList.json')
+    sm = cm.get_microservice_by_api('SM')
+
+
 
 
 @app.route('/link/request/submit', methods=['POST'])

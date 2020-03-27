@@ -1,8 +1,6 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-import json
 import logging
-import time
 import urllib
 import uuid
 
@@ -127,7 +125,7 @@ class HttpSigClient:
         if timeout:
             if not self.do_debug:
                 args['timeout'] = timeout
-        if method == self.Method.POST:
+        if method == self.Method.POST and body:
             # Set the content type
             headers['Content-Type'] = content_type
 
@@ -190,41 +188,3 @@ class HttpSigClient:
         if key_id not in self.trusted_keys:
             return None
         return self.trusted_keys[key_id]
-
-
-'''
-
-# sign_headers = ['(request-target)', 'Host', 'Date', 'Original-Date', 'Digest', 'X-Request-Id']
-
-# auth = HTTPSignatureAuth(key_id=self.key_id,
-#                          secret=self.privkey,
-#                          algorithm=self.algorithm,
-#                          headers=sign_headers)
-# headers['Content-Type'] = 'application/x-www-form-urlencoded'
-# requests.request('POST', "http://lab9054.inv.uji.es/aa.php", data=b"aaa=bbb", headers=headers)
-
- #hs = HeaderSigner()
- #hs.
-
- print("*******")
-
-auth = HTTPSignatureAuth(key=self.privkey, key_id=self.key_id, algorithm=self.algorithm, headers=sign_headers)
-#authClient = requests.Request(method, url, auth=auth, headers=headers, json={"key": "value"})
-#prepared = authClient.prepare()
-# authClient = requests.Request('POST', url, auth=auth, headers=headers, json={"key": "value"})
-data = {'aaa': 'bbb'}
-#authClient = requests.Request('POST', url, auth=auth, headers=headers, data=data)
-
-headers['Content-Type'] = 'application/x-www-form-urlencoded'
-authClient = requests.request(method, "http://lab9054.inv.uji.es/aa.php", auth=auth,
-                              headers=headers, data=b"aaa=bbb")
-#prepared = authClient.prepare()
-#pretty_print_http(prepared)
-# TODO: seguir. Si le paso el bytestring, no pone el content type form, creo (ver si puedo dump las cabeceras)
-#requests.request('POST', "http://lab9054.inv.uji.es/aa.php", data=b"aaa=bbb",
-#                 headers={'Content-Type': 'application/x-www-form-urlencoded'})
-# TODO esto de arriba funciona con post, pasando una bytestrung y con el content type, ajustar y probar
-# TODO: verificado. Como está ahora, en post, me envía el body, firmado, etc. Falta ver que esté bien y valide.
-# Implementar validador? probar contra SM? primero param,wtrizar bien, para que se añada el content type y
-# se contruya el body como toca. Probar tb con la otra librería a ver si manda el digest o no, Si lo manda, jusar la otra
-'''
