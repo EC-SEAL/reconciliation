@@ -25,7 +25,8 @@ class LinkTest(unittest.TestCase):
         cm = CMHandler('data/msMetadataList.json')
         mss = cm.get_microservices()
         sm = cm.get_microservice_by_api('SM')
-        print(sm)
 
         smh = SMHandler(sm, key='data/httpsig_key_esmo.pem', retries=5, validate=False)
         smh.startSession()
+        #smh.generateToken('SAMLms_0001', 'ACMms001')
+        #smh.getSessionVar("aaa")

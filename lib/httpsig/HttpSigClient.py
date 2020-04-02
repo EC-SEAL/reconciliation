@@ -1,13 +1,16 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
+import base64
+import hashlib
+import json
 import logging
 import urllib
 import uuid
 
 import requests
 from requests import Timeout
-from requests_http_signature import HTTPSignatureAuth
-# from httpsig.requests_auth import HTTPSignatureAuth, HeaderSigner
+#from requests_http_signature import HTTPSignatureAuth
+from httpsig.requests_auth import HTTPSignatureAuth
 from Crypto.PublicKey import RSA
 
 from lib.Tools import sha256_fingerprint, gmt_time, pretty_print_http
@@ -40,6 +43,7 @@ class HttpSigClient:
         self.do_debug = False
         self.validate_response = True
         self.algorithm = self.Algorithm.RSA_SHA256
+        self.digest_algorithm = self.Algorithm.SHA256
 
         # Private RSA key PEM
         with open(private_key, 'rb') as keyfile:
@@ -71,27 +75,52 @@ class HttpSigClient:
     # build the form body byte string and pass it like that (also, we need to
     # establish the content-type)
     def urlencode(self, post_params: dict):
+        print(post_params)
+        if not post_params:
+            return None
+        if not isinstance(post_params, dict):
+            return post_params
         return urllib.parse.urlencode(post_params).encode('utf-8')
 
     def get(self, url, timeout=None):
         return self.send_retry(self.Method.GET, url, timeout)
 
     def postForm(self, url, query=None, timeout=None):
-        return self.send_retry(self.Method.POST, url, query, self.ContentType.FORM, timeout)
+
+        # TODO: EWP implementation of HTTPSig is a bit lame. It always requires
+        #  the digest header to be there, even if there is no body. Let's first try
+        #  to digest the empty string, or else, send always a dummy. Also test sending a json body, as it is a dict. maybe i
+        #  have to urlencode to calculate
+        # if not body:
+        #     body = '{"hello": "world"}'.encode('utf-8')
+        body = self.urlencode(query)
+        return self.send_retry(self.Method.POST, url, body, self.ContentType.FORM, timeout)
 
     def postJson(self, url, body=None, timeout=None):
-        return self.send_retry(self.Method.POST, url, body, self.ContentType.JSON, timeout)
+        json_str = None
+        if body:
+            json_str = json.dumps(body).encode('utf-8')
+        return self.send_retry(self.Method.POST, url, json_str, self.ContentType.JSON, timeout)
+
+    def _base64_digest(self, content):
+        hash_alg = None
+        if self.digest_algorithm == self.Algorithm.SHA256:
+            hash_alg = hashlib.sha256
+        digest = hash_alg(content).digest()
+
+        return base64.b64encode(digest).decode()
 
     def send_retry(self, method, url, body=None, content_type=None, timeout=None):
         if not timeout:
             timeout = 3.0
         for i in range(0, self.retries):
-            try:
-                return self.send(method, url, body, content_type, timeout)
-            except Exception as ex:
-                logging.warning('HTTPSig client returned error (retries left: '
-                                + str(self.retries - i) + '): ' + str(ex))
-                raise ex
+            return self.send(method, url, body, content_type, timeout)
+            # try:
+            #    return self.send(method, url, body, content_type, timeout)
+            # except Exception as ex:
+            #    logging.warning('HTTPSig client returned error (retries left: '
+            #                    + str(self.retries - i) + '): ' + str(ex))
+            #    raise ex
 
     def send(self, method, url, body=None, content_type=None, timeout=None):
         request_id = str(uuid.uuid4())
@@ -99,19 +128,35 @@ class HttpSigClient:
 
         # Headers to send
         headers = {
+            'Accept': '*/*',
             'Date': now,
             'Original-Date': now,
             'X-Request-Id': request_id,
             'Accept-Signature': self.algorithm,
-            # 'Digest': '',
         }
 
         # Which headers will be signed (Digest will be added by the lib if there is a body)
-        sign_headers = ['(request-target)', 'Host', 'Date', 'Original-Date', 'X-Request-Id']
+        sign_headers = ['(request-target)', 'Host', 'Date', 'Original-Date', 'Digest', 'X-Request-Id']  # TODO maybe tolower?
+
+        if not body:
+            body = "".encode('utf-8')
+
+        # Calculate body digest, if any body is passed
+        #if body:
+        if "Digest" not in sign_headers:
+            sign_headers.append("Digest")
+        #digest = self._base64_digest(b"\r\n"+body)
+        digest = self._base64_digest(body)
+        print(digest)
+        headers["Digest"] = "SHA-256=" + digest
+
+        print(headers)
+        print(sign_headers)
 
         # Create the signature handler
         auth = HTTPSignatureAuth(key_id=self.key_id,
-                                 key=self.privkey,
+                                 #key=self.privkey,
+                                 secret=self.privkey,
                                  algorithm=self.algorithm,
                                  headers=sign_headers)
 
@@ -125,14 +170,10 @@ class HttpSigClient:
         if timeout:
             if not self.do_debug:
                 args['timeout'] = timeout
-        if method == self.Method.POST and body:
-            # Set the content type
-            headers['Content-Type'] = content_type
-
-            if content_type == self.ContentType.JSON:
-                args['json'] = body
-            if content_type == self.ContentType.FORM:
-                args['data'] = self.urlencode(body)
+        #if method == self.Method.POST and body:
+        # Set the content type
+        headers['Content-Type'] = content_type
+        args['data'] = body
 
         http_resp = None
         try:
@@ -154,14 +195,15 @@ class HttpSigClient:
         if not http_resp:
             raise HttpError(f"Received error code {http_resp.status_code} when connecting to {url}")
 
-        # Get response body, as a dict if json, as text if otherwise
-        try:
-            ret = http_resp.json()  # Returns the parsed json, if any
-        except ValueError:  # Not JSON
-            # ret = http_resp.content  # Returns bytes of the content
-            ret = http_resp.text  # Returns string of the content (in the incoming encoding)
-
-        return ret
+        # # Get response body, as a dict if json, as text if otherwise
+        # try:
+        #     ret = http_resp.json()  # Returns the parsed json, if any
+        # except ValueError:  # Not JSON
+        #     # ret = http_resp.content  # Returns bytes of the content
+        #     ret = http_resp.text  # Returns string of the content (in the incoming encoding)
+        #
+        # return ret
+        return http_resp
 
     def request(self, **kwargs):
         # Production requests

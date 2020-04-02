@@ -12,7 +12,7 @@ class HttpSigTest(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(HttpSigTest, self).__init__(*args, **kwargs)
-        # logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG)
         requests_log = logging.getLogger("requests.packages.urllib3")
         requests_log.setLevel(logging.DEBUG)
         requests_log.propagate = True
@@ -37,6 +37,8 @@ class HttpSigTest(unittest.TestCase):
     def test_get(self):
         key = 'data/httpsig_key.pem'
         fingerprint = '58f20aef58f63c28d95a57e5e7dd3e6971122ce35b5448acf36818874a0b2c0c'
+        key = 'data/httpsig_key_esmo.pem'
+        #fingerprint = '7a9ba747ab5ac50e640a07d90611ce612b7bde775457f2e57b804517a87c813b'
         trusted_keys = {'58f20aef58f63c28d95a57e5e7dd3e6971122ce35b5448acf36818874a0b2c0c':
                             'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJBbbirvao04+n3R0rvX2Mbq+J' +
                             'JyEl06K6hWf4MarVi6YTuJWWQb3D0mkWLATBchAntTsQsj+TH8VLkVIP3YWuOeT9' +
@@ -51,7 +53,7 @@ class HttpSigTest(unittest.TestCase):
 
         data = {"aaa": "bbb4", "ccc": "ddd ffff"}
         raw_form = b"aaa=bbb1&ccc=ddd"
-        # c.debug(True)
+        c.debug(True)
         c.validateResponse(False)
         # c.get("http://lab9054.inv.uji.es/")
         # c.get("http://stork.uji.es/")
@@ -59,8 +61,18 @@ class HttpSigTest(unittest.TestCase):
         # c.postForm("http://lab9054.inv.uji.es/aa.php", raw_form)
         # c.postForm("http://lab9054.inv.uji.es/aa.php?jjj=iii", data)
         # c.postJson("http://lab9054.inv.uji.es/aa.php", data)
-        c.get("https://www.google.com/")
-        c.postForm("http://lab9054.inv.uji.es/aa.php")
+
+        #c.get("https://www.google.com/")
+        #data = b'hello=world'
+        #c.postForm("http://lab9054.inv.uji.es/aa.php", query=data)
+        data = {"hello": "world"}
+        #data = None
+        #c.postJson("http://lab9054.inv.uji.es/aa.php", data)
+        #c.postForm("http://lab9054.inv.uji.es/aa.php")
+        res = c.postForm("http://esmo.uji.es:8090/sm/startSession")
+        print(res.text)
+        #c.postJson("http://esmo.uji.es:8090/sm/startSession", data)
 
         # TODO: SEGUIR implement better tests. then implement server part on the api as a decorator
         #  (and the SM mstoken validation, also as a decorator)
+        self.assertEqual(1, 1)

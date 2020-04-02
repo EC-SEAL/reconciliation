@@ -144,7 +144,7 @@
                 "apiClass": "SM",
                 "apiCall": "startSession",
                 "apiConnectionType": "post",
-                "apiEndpoint": "http://lab9054.inv.uji.es/aa.php"
+                "apiEndpoint": "http://esmo.uji.es:8090/sm/startSession"
             },
             {
                 "apiClass": "SM",

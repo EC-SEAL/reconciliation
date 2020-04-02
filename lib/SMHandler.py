@@ -4,16 +4,17 @@ from urllib.parse import urlencode
 
 from lib import Tools
 from lib.dto import MsMetadata
+from lib.dto.Dto import BadDtoInput
 from lib.dto.SessionMngrResponse import SessionMngrCode, SessionMngrResponse
 from lib.httpsig.HttpSigClient import HttpSigClient
 
 
-class EndpointNotFound(object):
+class EndpointNotFound(BaseException):
     def __init__(self, message):
         self.message = message
 
 
-class SessionManagerError(object):
+class SessionManagerError(BaseException):
     def __init__(self, message):
         self.message = message
 
@@ -56,8 +57,13 @@ class SMHandler:
 
     def startSession(self):
         url = self._getApiUrl('SM', 'startSession')
+        print("*****", url)
         res = self.httpsig.postForm(url)
-        res = SessionMngrResponse().unmarshall(res)
+        print("******", res.status_code)
+        try:
+            res = SessionMngrResponse().unmarshall(res)
+        except BadDtoInput:
+            raise SessionManagerError("Bad Response object. Not a SessionMgrResponse")
 
         if res.code == SessionMngrCode.ERROR:
             raise SessionManagerError("Session start failed: " + res.error)

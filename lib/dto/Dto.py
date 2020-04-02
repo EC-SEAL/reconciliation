@@ -7,7 +7,7 @@ class DTO:
     # From a dictionary, build a DTO derived object hierarchy
     def unmarshall(self, data_dict):
         if type(data_dict) is not dict:
-            raise Exception("data_dict must be a dictionary")
+            raise BadDtoInput("data_dict must be a dictionary")
 
         for attr, cls in self.__dict__.items():
             if attr in data_dict:
@@ -89,7 +89,11 @@ def cast_from_dict(dict_object, cast_class):
         raise NotDtoClass("Casting class can't be marshalled. It must extend DTO")
 
 
-class NotDtoClass(Exception):
+class NotDtoClass(BaseException):
+    def __init__(self, message):
+        self.message = message
+
+class BadDtoInput(BaseException):
     def __init__(self, message):
         self.message = message
 
