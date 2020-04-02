@@ -28,9 +28,11 @@ class LinkTest(unittest.TestCase):
 
         smh = SMHandler(sm, key='data/httpsig_key_esmo.pem', retries=5, validate=False)
         print("------------------------------------------")
-        smh.startSession()
+        sessionID = smh.startSession()
+        print("session---->" + sessionID)
 
-        smh.writeSessionVar('testvalue', 'testvar')
+        sessval = 'testvalue' + sessionID
+        smh.writeSessionVar(sessval, 'testvar')
         smh.writeSessionVar({'dictvar': 'dictval'}, 'testobj')
 
 
@@ -39,6 +41,21 @@ class LinkTest(unittest.TestCase):
 
         print("testvar---->"+val)
         print("testobj---->"+val2)
+
+        smh2 = SMHandler(sm, key='data/httpsig_key_esmo.pem', retries=5, validate=False)
+        sesid2 = smh2.getSession('testvar', sessval)
+        print("retrieved session---->" + sesid2)
+
+        token = smh.generateToken("SAMLms_0001", "SAMLms_0001")
+        print("generated token---> " + token)
+
+
+        smh3 = SMHandler(sm, key='data/httpsig_key_esmo.pem', retries=5, validate=False)
+        add_data = smh3.validateToken(token)
+        print("retrieved from token session---->" + smh3.sessId)
+
+
+
 
         smh.endSession()
 

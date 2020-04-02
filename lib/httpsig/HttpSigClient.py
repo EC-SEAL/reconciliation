@@ -116,13 +116,13 @@ class HttpSigClient:
         if not timeout:
             timeout = 3.0
         for i in range(0, self.retries):
-            return self.send(method, url, body, content_type, timeout)
-            # try:
-            #    return self.send(method, url, body, content_type, timeout)
-            # except Exception as ex:
-            #    logging.warning('HTTPSig client returned error (retries left: '
-            #                    + str(self.retries - i) + '): ' + str(ex))
-            #    raise ex
+            try:
+                return self.send(method, url, body, content_type, timeout)
+            except Exception as ex:
+               logging.warning('HTTPSig client returned error (retries left: '
+                               + str(self.retries - i) + '): ' + str(ex))
+               if i == self.retries-1:
+                   raise ex
 
     def send(self, method, url, body=None, content_type=None, timeout=None):
         request_id = str(uuid.uuid4())

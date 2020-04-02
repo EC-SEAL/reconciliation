@@ -68,6 +68,7 @@ class SMHandler:
 
         res = self.httpsig.postForm(url)
         res = self._parseResponse(res)
+        logging.debug('startSession Response: ' + str(res))
 
         if res.code == SessionMngrCode.ERROR:
             raise SessionManagerError("Session start failed: " + str(res.error))
@@ -85,10 +86,12 @@ class SMHandler:
 
         res = self.httpsig.get(url)
         res = self._parseResponse(res)
+        logging.debug('getSession Response: ' + str(res))
 
-        if not res.additionalData:
+        if not res.sessionData.sessionId:
             raise SessionManagerError("No sessionID on response")
-        self.sessId = res.additionalData
+        self.sessId = res.sessionData.sessionId
+        return self.sessId
 
     def endSession(self):
         url = self._getApiUrl('SM', 'endSession')
@@ -96,6 +99,7 @@ class SMHandler:
         try:
             res = self.httpsig.get(url)
         except HttpError as err:
+            logging.debug('endSession Failed: ' + str(err))
             raise SessionManagerError("Session end failed: " + str(err))
 
     # If name = NULL, get the whole session object
@@ -176,7 +180,8 @@ class SMHandler:
 
         logging.debug('Requesting token:' + url)
         res = self.httpsig.get(url)
-        logging.debug('Received response:' + res)
+        res = self._parseResponse(res)
+        logging.debug('Received response:' + str(res))
 
         if res.code == SessionMngrCode.ERROR:
             raise SessionManagerError("Token generation failed: " + res.error)
@@ -197,6 +202,8 @@ class SMHandler:
         res = self.httpsig.get(url)
         if not res:
             raise SessionManagerError("Bad response for validateToken")
+        res = self._parseResponse(res)
+        logging.debug('Received response:' + str(res))
 
         if res.code != SessionMngrCode.OK:
             raise SessionManagerError("Token validation failed: " + res.error)
@@ -206,6 +213,7 @@ class SMHandler:
         self.sessId = res.sessionData.sessionId
 
         logging.debug('sessionID retrieved from token: ' + res.sessionData.sessionId)
-        logging.debug('additionalData: ' + res.additionalData)
+        if res.additionalData:
+            logging.debug('it had additionalData: ' + res.additionalData)
 
         return res.additionalData
