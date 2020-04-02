@@ -27,6 +27,20 @@ class LinkTest(unittest.TestCase):
         sm = cm.get_microservice_by_api('SM')
 
         smh = SMHandler(sm, key='data/httpsig_key_esmo.pem', retries=5, validate=False)
+        print("------------------------------------------")
         smh.startSession()
+
+        smh.writeSessionVar('testvalue', 'testvar')
+        smh.writeSessionVar({'dictvar': 'dictval'}, 'testobj')
+
+
+        val = smh.getSessionVar('testvar')
+        val2 = smh.getSessionVar('testobj')
+
+        print("testvar---->"+val)
+        print("testobj---->"+val2)
+
+        smh.endSession()
+
         #smh.generateToken('SAMLms_0001', 'ACMms001')
         #smh.getSessionVar("aaa")

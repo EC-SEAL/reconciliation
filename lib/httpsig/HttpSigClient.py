@@ -9,7 +9,9 @@ import uuid
 
 import requests
 from requests import Timeout
-#from requests_http_signature import HTTPSignatureAuth
+# This implementation is not compatible with the SessionManager (at least as is), it
+# does not lowercase the names of the headers to calculate the string to sign
+# from requests_http_signature import HTTPSignatureAuth
 from httpsig.requests_auth import HTTPSignatureAuth
 from Crypto.PublicKey import RSA
 
@@ -170,10 +172,10 @@ class HttpSigClient:
         if timeout:
             if not self.do_debug:
                 args['timeout'] = timeout
-        #if method == self.Method.POST and body:
-        # Set the content type
-        headers['Content-Type'] = content_type
-        args['data'] = body
+        if method == self.Method.POST: # and body:  # TODO: see if we bring this back for something else
+            # Set the content type
+            headers['Content-Type'] = content_type
+            args['data'] = body
 
         http_resp = None
         try:

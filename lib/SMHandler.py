@@ -6,7 +6,7 @@ from lib import Tools
 from lib.dto import MsMetadata
 from lib.dto.Dto import BadDtoInput
 from lib.dto.SessionMngrResponse import SessionMngrCode, SessionMngrResponse
-from lib.httpsig.HttpSigClient import HttpSigClient
+from lib.httpsig.HttpSigClient import HttpSigClient, HttpError
 
 
 class EndpointNotFound(BaseException):
@@ -55,18 +55,22 @@ class SMHandler:
                                " not found on any entry in the " +
                                self.smMetadata.msId + " microservice metadata object")
 
-    def startSession(self):
-        url = self._getApiUrl('SM', 'startSession')
-        print("*****", url)
-        res = self.httpsig.postForm(url)
-        print("******", res.status_code)
+    def _parseResponse(self, requests_resp):
         try:
-            res = SessionMngrResponse().unmarshall(res)
+            smres = SessionMngrResponse()
+            smres.json_unmarshall(requests_resp.text)
         except BadDtoInput:
             raise SessionManagerError("Bad Response object. Not a SessionMgrResponse")
+        return smres
+
+    def startSession(self):
+        url = self._getApiUrl('SM', 'startSession')
+
+        res = self.httpsig.postForm(url)
+        res = self._parseResponse(res)
 
         if res.code == SessionMngrCode.ERROR:
-            raise SessionManagerError("Session start failed: " + res.error)
+            raise SessionManagerError("Session start failed: " + str(res.error))
 
         if not res.sessionData.sessionId:
             raise SessionManagerError("No sessionID on response")
@@ -80,6 +84,7 @@ class SMHandler:
         url = url + "?" + urlencode({'varName': variable, 'varValue': value})
 
         res = self.httpsig.get(url)
+        res = self._parseResponse(res)
 
         if not res.additionalData:
             raise SessionManagerError("No sessionID on response")
@@ -88,11 +93,10 @@ class SMHandler:
     def endSession(self):
         url = self._getApiUrl('SM', 'endSession')
         url = url + "?" + urlencode({'sessionId': self.sessId})
-
-        res = self.httpsig.get(url)
-
-        if res.code == SessionMngrCode.ERROR:
-            raise SessionManagerError("Session end failed: " + res.error)
+        try:
+            res = self.httpsig.get(url)
+        except HttpError as err:
+            raise SessionManagerError("Session end failed: " + str(err))
 
     # If name = NULL, get the whole session object
     def getSessionVar(self, name=None):
@@ -103,10 +107,11 @@ class SMHandler:
         url = self._getApiUrl('SM', 'getSessionData') + "?" + urlencode(queryParams)
 
         res = self.httpsig.get(url)
-        logging.debug('Received response:' + res)
+        res = self._parseResponse(res)
+        logging.debug('Received response:' + str(res))
 
         if res.code != SessionMngrCode.OK:
-            raise SessionManagerError("Variable fetch failed: " + res.error)
+            raise SessionManagerError("Variable fetch failed: " + str(res.error))
 
         if not res.sessionData:
             raise SessionManagerError("No sessionData on response")
@@ -129,26 +134,29 @@ class SMHandler:
     def writeSessionVar(self, value, name=None):
 
         logging.debug('Writing session variable (null means whole session object):'
-                      + name + ' with value: ' + value)
+                      + name + ' with value: ' + str(value))
 
-        json_value = json.dumps(value)
+        json_value = value
+        if isinstance(value, dict):
+            json_value = json.dumps(value)
         if not json_value:
             raise SessionManagerError("Error encoding value of var name in json: " + value)
 
-        body = '{' + \
-               f'"sessionId": "{self.sessId}",' + \
-               f'"variableName": "{name}",' + \
-               f'"dataObject": {json_value}' + \
-               '}'
+        body = {
+            'sessionId': self.sessId,
+            'variableName': name,
+            'dataObject': json_value,
+        }
 
         url = self._getApiUrl('SM', 'updateSessionData')
 
-        logging.debug('Body sent:' + body)
+        logging.debug('Body sent:' + str(body))
         res = self.httpsig.postJson(url, body)
-        logging.debug('Received response:' + res)
+        res = self._parseResponse(res)
+        logging.debug('Received response:' + str(res))
 
         if res.code == SessionMngrCode.ERROR:
-            raise SessionManagerError("Variable -" + name + "- write failed: " + res.error)
+            raise SessionManagerError("Variable -" + name + "- write failed: " + str(res.error))
 
     # The msId of the destination microservice
     def generateToken(self, origin: str, destination: str, data=None):

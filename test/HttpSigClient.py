@@ -1,9 +1,11 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 import hashlib
+import json
 import unittest
 import logging
 
+from lib.SMHandler import SMHandler
 from lib.Tools import sha256_fingerprint
 from lib.httpsig.HttpSigClient import HttpSigClient
 
@@ -69,9 +71,34 @@ class HttpSigTest(unittest.TestCase):
         #data = None
         #c.postJson("http://lab9054.inv.uji.es/aa.php", data)
         #c.postForm("http://lab9054.inv.uji.es/aa.php")
-        res = c.postForm("http://esmo.uji.es:8090/sm/startSession")
-        print(res.text)
-        #c.postJson("http://esmo.uji.es:8090/sm/startSession", data)
+        # c.postJson("http://esmo.uji.es:8090/sm/startSession", data)
+#         print("-------------------start session----------------------")
+#         res = c.postForm("http://esmo.uji.es:8090/sm/startSession")
+#         print(res.text)
+#         res = json.loads(res.text)
+#         sessionId = res['sessionData']['sessionId']
+#         print("sessionID:" + sessionId)
+#         print("------------------------------------------------------")
+#
+#
+# #getsession  "?varName=" + + "varValue=".urlencode($value);
+#
+#
+#         print("-------------------end session----------------------")
+#         res = c.get("http://esmo.uji.es:8090/sm/endSession?sessionId=" + sessionId)
+#         print(res.status_code)
+#         print("------------------------------------------------------")
+#
+#
+#         sm = SMHandler()
+
+        data = {'hello': 'world'}
+        #data = None
+        c.postJson("http://lab9054.inv.uji.es/aa.php", data)
+
+
+
+
 
         # TODO: SEGUIR implement better tests. then implement server part on the api as a decorator
         #  (and the SM mstoken validation, also as a decorator)
