@@ -10,6 +10,7 @@ from config import config
 from definitions import DEFAULT_DATA_DIR
 from engine import app
 from lib.CMHandler import CMHandler
+from lib.SMHandler import SMHandler, SessionManagerError
 from lib.Tools import load_json_file
 from lib.dto.Dataset import Dataset
 from lib.dto.LinkRequest import LinkRequest
@@ -46,23 +47,32 @@ httpsig_key_id = config.get('HTTPSig', 'key_id', fallback=None)
 httpsig_send_retries = config.getint('HTTPSig', 'retries', fallback=1)
 
 
-
-
+# Get SM ms_metadata object
 def session_manager():
     cm = CMHandler(data_dir + 'msMetadataList.json')
     sm = cm.get_microservice_by_api('SM')
+    smh = SMHandler(sm,
+                    key=httpsig_private_key,
+                    retries=httpsig_send_retries,
+                    validate=False)
+    return smh
 
 
-
+# API Endpoints
 
 @app.route('/link/request/submit', methods=['POST'])
 def submit_linking_request():
     clean_expired()
 
-    # TODO: check msToken against SM
+    # Check msToken against SM
     if 'msToken' not in request.form:
         return "missing msToken POST parameter or bad content-type", 404
     msToken = request.form['msToken']
+    smh = session_manager()
+    try:
+        smh.validateToken(msToken)
+    except SessionManagerError as err:
+        return 403, "Error validating msToken: " + str(err)
 
     # Load mappings to apply
     # TODO: for now, load on each request. Later decide if we load on launch time with refreshing (or not)
@@ -70,16 +80,21 @@ def submit_linking_request():
     reconciliation = Reconciliation()
     reconciliation.set_mappings(mappings_dicts)
 
+
+    # link_req = load_json_file('test/data/testLinkRequest.json') # TODO: insert block that inserts the req on the SM
+
+
     # Parse input request
-    link_req = load_json_file('test/data/testLinkRequest.json')
-    # TODO: Now we read from file, later we read from SM 'request' var
+    try:
+        link_req = smh.getSessionVar('linkRequest')
+    except SessionManagerError as err:
+        return 403, "Error retrieving linkRequest from SM: " + str(err)
     req = LinkRequest()
-    req.unmarshall(link_req)
+    req.json_unmarshall(link_req)
 
     now = datetime.now()
 
     request_id = str(uuid.uuid4())
-    request_id = "1234"  # TODO remove
 
     # Create a database row object
     db_req = database.Request(request_id=request_id, request_date=now,
