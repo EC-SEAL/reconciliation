@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting...</title>
+</head>
+<body onload="document.redirect.submit()">
+    <form name="redirect" method="post" action="{{ template.url }}">
+        <input type="hidden" name="msToken" value="{{ template.token }}">
+        <input type="submit"/>
+    </form>
+</body>
+</html>

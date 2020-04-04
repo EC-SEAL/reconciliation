@@ -10,6 +10,6 @@ gunicorn
 textdistance[extras]
 transliterate
 dateparser
-bravado-core
+#bravado-core
 httpsig  # This lib does not calculate and sign the digest of the body
 #requests-http-signature

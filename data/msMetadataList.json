@@ -120,43 +120,43 @@
                 "apiClass": "SM",
                 "apiCall": "endSession",
                 "apiConnectionType": "post",
-                "apiEndpoint": "http://SessionManager:8090/sm/endSession"
+                "apiEndpoint": "http://esmo.uji.es:8090/sm/endSession"
             },
             {
                 "apiClass": "SM",
                 "apiCall": "generateToken",
                 "apiConnectionType": "get",
-                "apiEndpoint": "http://SessionManager:8090/sm/generateToken"
+                "apiEndpoint": "http://esmo.uji.es:8090/sm/generateToken"
             },
             {
                 "apiClass": "SM",
                 "apiCall": "getSession",
                 "apiConnectionType": "get",
-                "apiEndpoint": "http://SessionManager:8090/sm/getSession"
+                "apiEndpoint": "http://esmo.uji.es:8090/sm/getSession"
             },
             {
                 "apiClass": "SM",
                 "apiCall": "getSessionData",
                 "apiConnectionType": "get",
-                "apiEndpoint": "http://SessionManager:8090/sm/getSessionData"
+                "apiEndpoint": "http://esmo.uji.es:8090/sm/getSessionData"
             },
             {
                 "apiClass": "SM",
                 "apiCall": "startSession",
                 "apiConnectionType": "post",
-                "apiEndpoint": "http://SessionManager:8090/sm/startSession"
+                "apiEndpoint": "http://esmo.uji.es:8090/sm/startSession"
             },
             {
                 "apiClass": "SM",
                 "apiCall": "updateSessionData",
                 "apiConnectionType": "post",
-                "apiEndpoint": "http://SessionManager:8090/sm/updateSessionData"
+                "apiEndpoint": "http://esmo.uji.es:8090/sm/updateSessionData"
             },
             {
                 "apiClass": "SM",
                 "apiCall": "validateToken",
                 "apiConnectionType": "get",
-                "apiEndpoint": "http://SessionManager:8090/sm/validateToken"
+                "apiEndpoint": "http://esmo.uji.es:8090/sm/validateToken"
             }
         ]
     }

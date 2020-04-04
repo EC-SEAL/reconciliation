@@ -72,7 +72,7 @@ def submit_linking_request():
     try:
         smh.validateToken(msToken)
     except SessionManagerError as err:
-        return 403, "Error validating msToken: " + str(err)
+        return "Error validating msToken: " + str(err), 403
 
     # Load mappings to apply
     # TODO: for now, load on each request. Later decide if we load on launch time with refreshing (or not)
@@ -80,15 +80,11 @@ def submit_linking_request():
     reconciliation = Reconciliation()
     reconciliation.set_mappings(mappings_dicts)
 
-
-    # link_req = load_json_file('test/data/testLinkRequest.json') # TODO: insert block that inserts the req on the SM
-
-
     # Parse input request
     try:
         link_req = smh.getSessionVar('linkRequest')
     except SessionManagerError as err:
-        return 403, "Error retrieving linkRequest from SM: " + str(err)
+        return "Error retrieving linkRequest from SM: " + str(err), 403
     req = LinkRequest()
     req.json_unmarshall(link_req)
 
@@ -125,18 +121,20 @@ def submit_linking_request():
     req.id = request_id
     request_json = req.json_marshall()
 
-    # TODO: Also, overwrite it in SM session
+    # We also overwrite it in SM session
+    try:
+        smh.writeSessionVar(req.marshall(), 'linkRequest')
+    except SessionManagerError as err:
+        return "Error writing updated linkRequest to SM: " + str(err), 403
 
     return Response(request_json,
                     status=200,
                     mimetype='application/json')
 
 
-# TODO: SEGUIR: integrate httpsig lib to build a client and a server lib
-# TODO: implement a session manager access library -> do the unit tests
 # TODO: integrate httpSig (server) or sessionmanager token validation (client) in all calls
+# TODO: SEGUIR: integrate httpsig lib to build a server in flask (try, but if too much, just rely on open access)
 # TODO: implement unit tests on each api function (see to mockup the SM, try to redefine the lib with a mockup)
-
 
 # Get request status in DB
 @app.route('/link/<request_id>/status', methods=['GET'])
@@ -167,16 +165,21 @@ def linking_request_status(request_id):
 def cancel_linking_request(request_id):
     clean_expired()
 
-    # TODO: check msToken against SM
+    # Check msToken against SM
     if 'msToken' not in request.form:
         return "missing msToken POST parameter or bad content-type", 404
     msToken = request.form['msToken']
+    smh = session_manager()
+    try:
+        smh.validateToken(msToken)
+    except SessionManagerError as err:
+        return "Error validating msToken: " + str(err), 403
 
     req = get_request(request_id)
     if not req:
         return "Request ID not found", 403
 
-    if not check_owner(request.args.get('sessionToken'), req.request_owner):
+    if not check_owner(smh.sessId, req.request_owner):
         return "Request does not belong to the authenticated user", 403
 
     try:
@@ -190,16 +193,21 @@ def cancel_linking_request(request_id):
 def linking_request_result(request_id):
     clean_expired()
 
-    # TODO: check msToken against SM
+    # Check msToken against SM
     if 'msToken' not in request.form:
         return "missing msToken POST parameter or bad content-type", 404
     msToken = request.form['msToken']
+    smh = session_manager()
+    try:
+        smh.validateToken(msToken)
+    except SessionManagerError as err:
+        return "Error validating msToken: " + str(err), 403
 
     req = get_request(request_id)
     if not req:
         return "Request ID not found", 403
 
-    if not check_owner(request.args.get('sessionToken'), req.request_owner):
+    if not check_owner(smh.sessId, req.request_owner):
         return "Request does not belong to the authenticated user", 403
 
     if req.status != "ACCEPTED":
@@ -230,6 +238,14 @@ def linking_request_result(request_id):
 
     result_json = result.json_marshall()
     # TODO: sign the response json string
+
+    # Overwrite the response in the SM session
+    try:
+        smh.writeSessionVar(req.marshall(), 'linkRequest')
+    except SessionManagerError as err:
+        return "Error writing updated linkRequest to SM: " + str(err), 403
+
+    # TODO: add the response to the datastore in session
 
     try:
         delete_request(request_id)

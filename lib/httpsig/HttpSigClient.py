@@ -11,8 +11,8 @@ import requests
 from requests import Timeout
 # This implementation is not compatible with the SessionManager (at least as is), it
 # does not lowercase the names of the headers to calculate the string to sign
-# from requests_http_signature import HTTPSignatureAuth
-from httpsig.requests_auth import HTTPSignatureAuth
+from requests_http_signature import HTTPSignatureAuth
+#from httpsig.requests_auth import HTTPSignatureAuth
 from Crypto.PublicKey import RSA
 
 from lib.Tools import sha256_fingerprint, gmt_time, pretty_print_http
@@ -184,6 +184,7 @@ class HttpSigClient:
         #  to implement the digest (or DIY)
         if self.validate_response:
             HTTPSignatureAuth.verify(http_resp, key_resolver=self.trusted_keys_resolver)
+            # TODO: this is not implemented on the other lib. Implement myself
 
         if not http_resp:
             raise HttpError(f"Received error code {http_resp.status_code} when connecting to {url}")
