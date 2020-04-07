@@ -12,7 +12,8 @@ import logging
 from lib.SMHandler import SMHandler
 from lib.Tools import sha256_fingerprint
 from lib.dto.SessionMngrResponse import SessionMngrCode, SessionMngrResponse
-from lib.httpsig.HttpSigClient import HttpSigClient, HttpError
+from lib.httpsig.HttpSig import HttpError
+from lib.httpsig.HttpSigClient import HttpSigClient
 
 
 class HttpSigTest(unittest.TestCase):

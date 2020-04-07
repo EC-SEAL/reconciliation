@@ -6,6 +6,7 @@ class LinkRequest(DTO):
     def __init__(self):
         self.id = str
         self.issuer = str
+        self.type = str
         self.lloa = str
         self.issued = str
         self.expiration = str

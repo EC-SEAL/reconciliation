@@ -37,6 +37,9 @@ acceptance_threshold = config.getfloat('App', 'acceptance_threshold', fallback="
 # Which LLoA will have the resulting link if accepted
 lloa = config.get('App', 'lloa', fallback="low")
 
+# Type of the generated link dataset
+dataset_type = config.get('App', 'dataset_type', fallback="")
+
 # Private RSA key to use
 httpsig_private_key = config.get('HTTPSig', 'private_key')
 
@@ -46,10 +49,19 @@ httpsig_key_id = config.get('HTTPSig', 'key_id', fallback=None)
 # As SM sometimes fails to validate signature, we retry the connection for resilience
 httpsig_send_retries = config.getint('HTTPSig', 'retries', fallback=1)
 
+# Config Manager ms metadata url
+ms_metadata_url = config.get('CM', 'url', fallback=None)
+
+# Config Manager ms metadata url
+cm_cache_lifetime = config.get('CM', 'cache_lifetime', fallback=None)
+
 
 # Get SM ms_metadata object
 def session_manager():
-    cm = CMHandler(data_dir + 'msMetadataList.json')
+    cm = CMHandler(data_dir,
+                   ms_source_url=ms_metadata_url,
+                   key=httpsig_private_key,
+                   lifetime=cm_cache_lifetime)
     sm = cm.get_microservice_by_api('SM')
     smh = SMHandler(sm,
                     key=httpsig_private_key,
@@ -75,7 +87,6 @@ def submit_linking_request():
         return "Error validating msToken: " + str(err), 403
 
     # Load mappings to apply
-    # TODO: for now, load on each request. Later decide if we load on launch time with refreshing (or not)
     mappings_dicts = load_json_file(data_dir + 'attributeMaps.json')
     reconciliation = Reconciliation()
     reconciliation.set_mappings(mappings_dicts)
@@ -132,8 +143,11 @@ def submit_linking_request():
                     mimetype='application/json')
 
 
-# TODO: integrate httpSig (server) or sessionmanager token validation (client) in all calls
-# TODO: SEGUIR: integrate httpsig lib to build a server in flask (try, but if too much, just rely on open access)
+# TODO: SEGUIR: refactor HTTPSig lib;  implement CMHandler
+# TODO: integrate httpsig lib to build a server in flask (try, but if too much, just rely on open access)
+# TODO: integrate httpSig (server) in all back-channel calls, if needed
+# TODO: add inline signature to response dataset
+# TODO: add the response to the datastore as well as to the session var
 # TODO: implement unit tests on each api function (see to mockup the SM, try to redefine the lib with a mockup)
 
 # Get request status in DB
@@ -228,6 +242,7 @@ def linking_request_result(request_id):
     result = LinkRequest()
     result.id = req.request_id
     result.issuer = issuer
+    result.type = dataset_type
     result.lloa = lloa
     result.issued = datetime.now().isoformat()
     result.expiration = expiration

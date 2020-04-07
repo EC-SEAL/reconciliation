@@ -21,8 +21,8 @@ data_dir = config.get('Configuration', 'dir')
 # Start a linking request
 @app.route('/test/client/submit', methods=['GET'])
 def test_client_submit_linking_request():
-
-    cm = CMHandler(data_dir + 'msMetadataList.json')
+    ms_url = "http://esmo.uji.es:8080/cm/metadata/microservices" # TODO: SEGUIR: colgare n otra url y probar
+    cm = CMHandler(data_dir, key='test/data/httpsig_key_esmo.pem', lifetime=30, ms_source_url=ms_url)
     sm = cm.get_microservice_by_api('SM')
     smh = SMHandler(sm, key='test/data/httpsig_key_esmo.pem', retries=5, validate=False)
 

@@ -1,18 +1,85 @@
+import json
+import logging
+import os
+from datetime import datetime, timedelta
+from json import JSONDecodeError
+
 from lib.Tools import load_json_file
 from lib.dto.MsMetadata import MsMetadata
 
 
+# Will handle access to the needed Config Manager files.
+# Will keep a local copy of the file and only update
+# if it successfully retrieved the new one
+from lib.httpsig.HttpSig import HttpError
+from lib.httpsig.HttpSigClient import HttpSigClient
+
+
+class CMHandlerError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
 class CMHandler:
 
-    def __init__(self, cache_path, source_url=""):
-        self.microservices_url = source_url
-        self.cache_path = cache_path
+    def __init__(self, cache_dir, ms_source_url=None, key=None, lifetime=600):
+        self.microservices_url = ms_source_url
+        self.cache_dir = cache_dir
         self.microservices = None
+        # How many seconds between cache update attempts
+        self.lifetime = lifetime
+        self.httpsig = None
+        if key:
+            self.httpsig = HttpSigClient(key)
+            self.httpsig.doValidateResponse(False)
+
+    # Gets the content of a config file, from cache or remote
+    def _get(self, file_path, remote_url=None):
+        ret_dict = None
+        # First, try to read locally
+        if os.path.isfile(file_path) \
+                and os.path.getsize(file_path) > 0:
+            try:
+                ret_dict = load_json_file(file_path)
+            except (OSError, JSONDecodeError, TypeError) as err:
+                logging.warning(f"Error accessing file {file_path}: {err}")
+
+        # If cache is outdated, fetch file (if we have a url and key)
+        last_write = datetime.fromtimestamp(os.path.getmtime(file_path))
+        threshold = datetime.now() - timedelta(seconds=self.lifetime)
+        if self.httpsig and last_write < threshold:
+            res = None
+            try:
+                res = self.httpsig.get(remote_url)
+            except HttpError as err:
+                logging.warning(f"Error fetching remote config file {remote_url}: {err}")
+
+            # Parse the fetched file.
+            if res and res.text:
+                fetched_dict = None
+                try:
+                    fetched_dict = json.loads(res.text)
+                except (JSONDecodeError, TypeError) as err:
+                    logging.warning(f"Error decoding fetched file {file_path} from {remote_url}: {err}")
+
+                #  If successful, overwrite
+                if fetched_dict:
+                    try:
+                        with open(file_path, 'w') as f:
+                            f.write(ret_dict)
+                    except (OSError, IOError) as err:
+                        logging.warning(f"Error overwriting file {file_path}: {err}")
+                    # Regardless of we were able to overwrite or not, return the fetched data
+                    ret_dict = fetched_dict
+
+        # Return config set contents, or error if empty
+        if not ret_dict:
+            raise CMHandlerError("Requested config set not found or empty")
+        return ret_dict
 
     def _fetch_microservices(self):
-        # TODO: here, read it from the CM url, keep a cache for resilience,
-        #  update cache only if file can be parsed
-        ms_dicts = load_json_file(self.cache_path)
+        ms_dicts = self._get(self.cache_dir + '/msMetadataList.json',
+                             self.microservices_url)
         self.microservices = []
         for ms in ms_dicts:
             self.microservices.append(MsMetadata().unmarshall(ms))

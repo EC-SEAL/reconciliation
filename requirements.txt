@@ -12,4 +12,4 @@ transliterate
 dateparser
 #bravado-core
 httpsig  # This lib does not calculate and sign the digest of the body
-#requests-http-signature
+#requests-http-signature # This lib makes signature to fail, as it does not lowercase the headers

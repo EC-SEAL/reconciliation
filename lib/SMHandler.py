@@ -6,7 +6,8 @@ from lib import Tools
 from lib.dto import MsMetadata
 from lib.dto.Dto import BadDtoInput
 from lib.dto.SessionMngrResponse import SessionMngrCode, SessionMngrResponse
-from lib.httpsig.HttpSigClient import HttpSigClient, HttpError
+from lib.httpsig.HttpSig import HttpSig, HttpError
+from lib.httpsig.HttpSigClient import HttpSigClient
 
 
 class EndpointNotFound(BaseException):
@@ -39,7 +40,7 @@ class SMHandler:
         self.httpsig = HttpSigClient(self.key, trusted_keys,
                                      key_id=self.key_id, retries=self.retries)
 
-        self.httpsig.validateResponse(validate)
+        self.httpsig.doValidateResponse(validate)
 
     def getSessID(self):
         return self.sessId

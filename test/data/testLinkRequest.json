@@ -2,6 +2,7 @@
   "id": null,
   "issuer" : null,
   "lloa" : null,
+  "type" : null,
   "issued" : null,
   "expiration" : null,
   "evidence" : null,

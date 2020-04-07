@@ -14,14 +14,14 @@ def read_config(cfg_files):
     if isinstance(cfg_files, str):
         cfg_files = [cfg_files]
 
-    config = configparser.RawConfigParser()
+    cfg = configparser.RawConfigParser()
 
     # merges all files into a single config
     for i, cfg_file in enumerate(cfg_files):
         if os.path.exists(cfg_file):
-            config.read(cfg_file)
+            cfg.read(cfg_file)
 
-    return config
+    return cfg
 
 
 config_file_path = os.getenv('PROPERTIES_FILE', PROPERTIES_FILE)
