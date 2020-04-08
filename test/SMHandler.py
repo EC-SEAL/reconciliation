@@ -11,21 +11,21 @@ from lib.CMHandler import CMHandler
 from lib.SMHandler import SMHandler
 
 
-class LinkTest(unittest.TestCase):
+class SMHandlerTest(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
-        super(LinkTest, self).__init__(*args, **kwargs)
-        # logging.basicConfig(level=logging.DEBUG)
-        # requests_log = logging.getLogger("requests.packages.urllib3")
-        # requests_log.setLevel(logging.DEBUG)
-        # requests_log.propagate = True
+        super(SMHandlerTest, self).__init__(*args, **kwargs)
+        logging.basicConfig(level=logging.DEBUG)
+        requests_log = logging.getLogger("requests.packages.urllib3")
+        requests_log.setLevel(logging.DEBUG)
+        requests_log.propagate = True
         self.init_tests()
 
     def init_tests(self):
         pass
 
     def test_session_manager(self):
-        cm = CMHandler('data/msMetadataList.json')
+        cm = CMHandler('data/')
         sm = cm.get_microservice_by_api('SM')
 
         smh = SMHandler(sm, key='data/httpsig_key_esmo.pem', retries=5, validate=False)

@@ -21,7 +21,8 @@ data_dir = config.get('Configuration', 'dir')
 # Start a linking request
 @app.route('/test/client/submit', methods=['GET'])
 def test_client_submit_linking_request():
-    ms_url = "http://esmo.uji.es:8080/cm/metadata/microservices" # TODO: SEGUIR: colgare n otra url y probar
+    # ms_url = "http://esmo.uji.es:8080/cm/metadata/microservices"
+    ms_url = "http://lab9054.inv.uji.es/~paco/seal/msmetadata.json"
     cm = CMHandler(data_dir, key='test/data/httpsig_key_esmo.pem', lifetime=30, ms_source_url=ms_url)
     sm = cm.get_microservice_by_api('SM')
     smh = SMHandler(sm, key='test/data/httpsig_key_esmo.pem', retries=5, validate=False)
@@ -50,6 +51,8 @@ def test_client_submit_linking_request():
 #  status (httpsig?)
 #  cancel (msToken)
 
+
+# TODO: add a test service to trigger an SP Request and redirect to the RequestManager
 
 def httpsig_client():
     key = 'test/data/httpsig_key.pem'

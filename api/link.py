@@ -53,7 +53,7 @@ httpsig_send_retries = config.getint('HTTPSig', 'retries', fallback=1)
 ms_metadata_url = config.get('CM', 'url', fallback=None)
 
 # Config Manager ms metadata url
-cm_cache_lifetime = config.get('CM', 'cache_lifetime', fallback=None)
+cm_cache_lifetime = config.getint('CM', 'cache_lifetime', fallback=None)
 
 
 # Get SM ms_metadata object
@@ -143,7 +143,7 @@ def submit_linking_request():
                     mimetype='application/json')
 
 
-# TODO: SEGUIR: refactor HTTPSig lib;  implement CMHandler
+# TODO: SEGUIR:
 # TODO: integrate httpsig lib to build a server in flask (try, but if too much, just rely on open access)
 # TODO: integrate httpSig (server) in all back-channel calls, if needed
 # TODO: add inline signature to response dataset
