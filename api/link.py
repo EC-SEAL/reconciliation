@@ -144,10 +144,10 @@ def submit_linking_request():
 
 
 # TODO: SEGUIR:
+# TODO: add the response to the datastore as well as to the session var
 # TODO: integrate httpsig lib to build a server in flask (try, but if too much, just rely on open access)
 # TODO: integrate httpSig (server) in all back-channel calls, if needed
 # TODO: add inline signature to response dataset
-# TODO: add the response to the datastore as well as to the session var
 # TODO: implement unit tests on each api function (see to mockup the SM, try to redefine the lib with a mockup)
 
 # Get request status in DB
@@ -256,7 +256,7 @@ def linking_request_result(request_id):
 
     # Overwrite the response in the SM session
     try:
-        smh.writeSessionVar(req.marshall(), 'linkRequest')
+        smh.writeSessionVar(result.marshall(), 'linkRequest')
     except SessionManagerError as err:
         return "Error writing updated linkRequest to SM: " + str(err), 403
 
