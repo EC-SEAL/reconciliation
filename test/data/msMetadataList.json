@@ -159,5 +159,30 @@
                 "apiEndpoint": "http://esmo.uji.es:8090/sm/validateToken"
             }
         ]
-    }
+    },
+
+    {
+    "msId": "RMms001",
+    "authorisedMicroservices": [
+        "SAMLms_0001",
+        "SMms001",
+        "CMms001",
+        "IdPms001"
+    ],
+    "rsaPublicKeyBinary": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCi7jZVwQFxQ2SY4lxjr05IexolQJJobwYzrvE5pk7AcQpG46kuJBzD8ziiqFFCGSNZ07cLWys+b5JmJ6kU44lKLVeGbEpgaO0OTBDLMk2fi5U83T8dezgWgaPFiy/N3sHPpcW2Y3ZePo0UbM7MLzv14TR+jxTOyrmwWwGwDJsz+wIDAQAB",
+    "publishedAPI": [
+      {
+        "apiClass": "RM",
+        "apiCall": "rmRequest",
+        "apiConnectionType": "post",
+        "apiEndpoint": "https://vm.project-seal.eu:8063/rm/request"
+      },
+      {
+        "apiClass": "RM",
+        "apiCall": "rmResponse",
+        "apiConnectionType": "post",
+        "apiEndpoint": "https://vm.project-seal.eu:8063/rm/response"
+      }
+    ]
+  }
 ]

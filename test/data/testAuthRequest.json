@@ -1,3 +1,53 @@
 {
-
+  "id": "_69a510337f266e8d0fbcbd15ab197634114f2d810a",
+  "type": "Request",
+  "issuer": "https://clave.sir2.rediris.es/module.php/saml/sp/saml2-acs.php/q2891006e_ea0002678",
+  "recipient": null,
+  "inResponseTo": null,
+  "loa": null,
+  "notBefore": "2020-04-16T05:26:29Z",
+  "notAfter": "2020-04-16T05:31:29Z",
+  "status": null,
+  "attributes": [
+    {
+      "name": "http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier",
+      "friendlyName": null,
+      "encoding": null,
+      "language": null,
+      "isMandatory": true,
+      "values": null
+    },
+    {
+      "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName",
+      "friendlyName": null,
+      "encoding": null,
+      "language": null,
+      "isMandatory": true,
+      "values": null
+    },
+    {
+      "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName",
+      "friendlyName": null,
+      "encoding": null,
+      "language": null,
+      "isMandatory": true,
+      "values": null
+    }
+  ],
+  "properties": {
+    "SAML_RelayState": "",
+    "SAML_RemoteSP_RequestId": "_fb9b2627bb634cc7ed98b4f71ee53d93",
+    "SAML_ForceAuthn": true,
+    "SAML_isPassive": false,
+    "SAML_NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+    "SAML_AllowCreate": false,
+    "EIDAS_ProviderName": "AAAAAA_BBBBBB",
+    "EIDAS_IdFormat": null,
+    "EIDAS_SPType": null,
+    "EIDAS_LoA": "http://eidas.europa.eu/LoA/low",
+    "EIDAS_country": null,
+    "NameIDFormat": null,
+    "NameQualifier": null,
+    "NameID": null
+  }
 }

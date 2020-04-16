@@ -9,7 +9,7 @@ from engine import app
 from config import config
 
 from lib.CMHandler import CMHandler
-from lib.SMHandler import SMHandler
+from lib.SMHandler import SMHandler, EndpointNotFound
 from lib.Tools import load_json_file
 from lib.dto.LinkRequest import LinkRequest
 
@@ -31,12 +31,26 @@ def httpsig_client():
     return HttpSigClient(key, trusted_keys)
 
 
-def sm_handler():
+def cm_handler():
     # ms_url = "http://esmo.uji.es:8080/cm/metadata/microservices"
-    ms_url = "http://lab9054.inv.uji.es/~paco/seal/msmetadata.json"
-    cm = CMHandler(data_dir, key='test/data/httpsig_key_esmo.pem', lifetime=30, ms_source_url=ms_url)
+    # ms_url = "http://lab9054.inv.uji.es/~paco/seal/msmetadata.json"
+    ms_url = "http://lab9054.inv.uji.es/~paco/seal/msMetadataList.json"
+    return CMHandler(data_dir, key='test/data/httpsig_key_esmo.pem', lifetime=30, ms_source_url=ms_url)
+
+
+def sm_handler():
+    cm = cm_handler()
     sm = cm.get_microservice_by_api('SM')
     return SMHandler(sm, key='test/data/httpsig_key_esmo.pem', retries=5, validate=False)
+
+
+def get_url(mo, apiClass, apiCall):
+    for api in mo.publishedAPI:
+        if api.apiClass == apiClass and api.apiCall == apiCall:
+            return api.apiEndpoint
+    raise EndpointNotFound("API call " + apiCall + " from class " + apiClass +
+                           " not found on any entry in the " +
+                           mo.smMetadata.msId + " microservice metadata object")
 
 
 # API Endpoints
@@ -117,29 +131,48 @@ def test_client_getresult_linking_request(request_id=None):
 
 # TODO: Write the test req and metadata, tune this with the proper parameters and target ms, and test
 # Start a linking request
-@app.route('/test/client/sp/<idp>', methods=['GET'])
-def test_client_submit_auth_request(idp):
+#   to <idp> [Discovery, PDS, uportSSIwallet, eIDAS, eduGAIN]
+#   of <type> [auth_request, data_query]
+# http://localhost:8080/test/client/sp/eduGAIN/auth_request
+@app.route('/test/client/sp/<idp>/<type>', methods=['GET'])
+def test_client_submit_auth_request(idp, type):
+
+    # Start session
     smh = sm_handler()
     smh.startSession()
     print("Started session: " + smh.sessId + "<br/>\n")
-    token = smh.generateToken("SAMLms_0001", "SAMLms_0001")
-    print("Generated msToken: " + token + "<br/>\n")
 
+    # Generate Token
+    dest = 'RMms001'
+    token = smh.generateToken("SAMLms_0001", dest)
+    print(f"Generated msToken addressed to {dest}: {token}<br/>\n")
+
+    # Write session variables
     with open('test/data/testAuthRequest.json', encoding='utf-8') as f:
         authreq = f.read()
-    smh.writeSessionVar(authreq, 'spRequest') # TODO: check variable
+    smh.writeSessionVar(authreq, 'spRequest')  # TODO: check variable
     with open('test/data/testSPMetadata.json', encoding='utf-8') as f:
         spmeta = f.read()
     smh.writeSessionVar(spmeta, 'spMetadata')  # TODO: check variable
     smh.writeSessionVar(idp, 'apEntityId')  # TODO: check variable
 
+    smh.writeSessionVar(type, 'spRequestEP')
+    smh.writeSessionVar(idp, 'spRequestSource')
+
     # Check written vars
     print("spRequest: " + smh.getSessionVar('spRequest') + "<br/>\n")
     print("spMetadata: " + smh.getSessionVar('spMetadata') + "<br/>\n")
     print("apEntityId: " + smh.getSessionVar('apEntityId') + "<br/>\n")
+    print("spRequestEP: " + smh.getSessionVar('spRequestEP') + "<br/>\n")
+    print("spRequestSource: " + smh.getSessionVar('spRequestSource') + "<br/>\n")
 
+    # Now let's get the Request Manager metadata
+    cm = cm_handler()
+    rm = cm.get_microservice_by_api('RM')
+
+    url = get_url(rm, 'RM', 'rmRequest')
     template = {
-        'url': '/link/request/submit',
+        'url': url,
         'token': token,
     }
 
