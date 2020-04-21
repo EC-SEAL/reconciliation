@@ -9,7 +9,6 @@ import loader
 import logging
 import database
 
-
 # Read Server configuration
 host = config.get('Server', 'host', fallback='localhost')
 port = config.getint('Server', 'port', fallback=8080)
@@ -34,14 +33,12 @@ db_user = config.get('Database', 'user', fallback='')
 db_pass = config.get('Database', 'password', fallback='')
 db_path = config.get('Database', 'path', fallback='data/requests.db')
 
-
 # Setup logger
 logging.basicConfig(level=loglevel,
                     format='%(asctime)s %(levelname)s:%(name)s: %(message)s',
                     filename=logfile)
 
 logging.info("Using configuration file in: " + config_file_path)
-
 
 # Get database engine
 database_engine = database.db_engine(db_driver, db_path,
@@ -60,13 +57,8 @@ try:
 except OperationalError:
     logging.warning("No tables are dropped")
 
-
 # Create (or update) database schema
 database.DbTable.metadata.create_all()
-
-
-
-
 
 
 # Publish root test service
@@ -77,7 +69,6 @@ def hello_world():
 
 # Publish the rest of the services defined on the api directory
 loader.load_libs(API_DIR, API_ROOT_PACKAGE)
-
 
 # Launch server
 #   to launch in production:

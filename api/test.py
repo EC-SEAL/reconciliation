@@ -18,30 +18,36 @@ from lib.httpsig.HttpSigClient import HttpSigClient
 
 data_dir = config.get('Configuration', 'dir')
 port = config.get('Server', 'port')
+key_file = config.get('HTTPSig', 'private_key')
+cm_url = config.get('CM', 'url')
 
+client_key_file = config.get('TestClient', 'cli_key')
+trusted_key = config.get('TestClient', 'trusted_key')
+fingerprnt = config.get('TestClient', 'fingerprint')
+test_link_req = config.get('TestClient', 'test_link_req')
+
+test_auth_req = config.get('TestClient', 'test_auth_req')
+test_sp_metadata = config.get('TestClient', 'test_sp_metadata')
 
 def httpsig_client():
-    key = 'test/data/httpsig_key.pem'
-    fingerprint = '58f20aef58f63c28d95a57e5e7dd3e6971122ce35b5448acf36818874a0b2c0c'
-    trusted_keys = {'58f20aef58f63c28d95a57e5e7dd3e6971122ce35b5448acf36818874a0b2c0c':
-                        'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJBbbirvao04+n3R0rvX2Mbq+J' +
-                        'JyEl06K6hWf4MarVi6YTuJWWQb3D0mkWLATBchAntTsQsj+TH8VLkVIP3YWuOeT9' +
-                        '49AmfGQ1lM5FTzYmyh5wl6n1v/k7CGKqkm/WLRZD94HJE+FDhJ+ERy4/nF54n6ex' +
-                        'Z1Fd4eevfzE1QqNJSQIDAQAB'}
+    key = client_key_file
+    fingerprint = fingerprnt
+    trusted_keys = {fingerprnt: trusted_key}
     return HttpSigClient(key, trusted_keys)
 
 
 def cm_handler():
     # ms_url = "http://esmo.uji.es:8080/cm/metadata/microservices"
     # ms_url = "http://lab9054.inv.uji.es/~paco/seal/msmetadata.json"
-    ms_url = "http://lab9054.inv.uji.es/~paco/seal/msMetadataList.json"
-    return CMHandler(data_dir, key='test/data/httpsig_key_esmo.pem', lifetime=30, ms_source_url=ms_url)
+    # ms_url = "http://lab9054.inv.uji.es/~paco/seal/msMetadataList.json"
+    ms_url = cm_url
+    return CMHandler(data_dir, key=key_file, lifetime=30, ms_source_url=ms_url)
 
 
 def sm_handler():
     cm = cm_handler()
     sm = cm.get_microservice_by_api('SM')
-    return SMHandler(sm, key='test/data/httpsig_key_esmo.pem', retries=5, validate=False)
+    return SMHandler(sm, key=key_file, retries=5, validate=False)
 
 
 def get_url(mo, apiClass, apiCall):
@@ -67,7 +73,7 @@ def test_client_submit_linking_request():
     token = smh.generateToken("SAMLms_0001", "SAMLms_0001")
     print("Generated msToken: " + token + "<br/>\n")
 
-    streq = load_json_file('test/data/testLinkRequest.json')
+    streq = load_json_file(test_link_req)
     treq = LinkRequest()
     treq.unmarshall(streq)
     smh.writeSessionVar(treq.marshall(), 'linkRequest')
@@ -129,7 +135,7 @@ def test_client_getresult_linking_request(request_id=None):
     return render_template('msToken.html', template=template)
 
 
-# TODO: Write the test req and metadata, tune this with the proper parameters and target ms, and test
+# TODO: tune this with the proper parameters and target ms, and test
 # Start a linking request
 #   to <idp> [Discovery, PDS, uportSSIwallet, eIDAS, eduGAIN]
 #   of <type> [auth_request, data_query]
@@ -148,10 +154,10 @@ def test_client_submit_auth_request(idp, type):
     print(f"Generated msToken addressed to {dest}: {token}<br/>\n")
 
     # Write session variables
-    with open('test/data/testAuthRequest.json', encoding='utf-8') as f:
+    with open(test_auth_req, encoding='utf-8') as f:
         authreq = f.read()
     smh.writeSessionVar(authreq, 'spRequest')  # TODO: check variable
-    with open('test/data/testSPMetadata.json', encoding='utf-8') as f:
+    with open(test_sp_metadata, encoding='utf-8') as f:
         spmeta = f.read()
     smh.writeSessionVar(spmeta, 'spMetadata')  # TODO: check variable
     smh.writeSessionVar(idp, 'apEntityId')  # TODO: check variable
