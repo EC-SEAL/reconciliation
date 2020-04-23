@@ -37,9 +37,6 @@ def httpsig_client():
 
 
 def cm_handler():
-    # ms_url = "http://esmo.uji.es:8080/cm/metadata/microservices"
-    # ms_url = "http://lab9054.inv.uji.es/~paco/seal/msmetadata.json"
-    # ms_url = "http://lab9054.inv.uji.es/~paco/seal/msMetadataList.json"
     ms_url = cm_url
     return CMHandler(data_dir, key=key_file, lifetime=30, ms_source_url=ms_url)
 

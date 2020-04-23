@@ -10,19 +10,19 @@
                 "apiClass": "AP",
                 "apiCall": "query",
                 "apiConnectionType": "post",
-                "apiEndpoint": "https://esmo.uji.es/ESMO/module.php/esmo/ap/query.php/saml2"
+                "apiEndpoint": "https://esmoGateway/ESMO/module.php/esmo/ap/query.php/saml2"
             },
             {
                 "apiClass": "SP",
                 "apiCall": "handleResponse",
                 "apiConnectionType": "post",
-                "apiEndpoint": "https://esmo.uji.es/ESMO/module.php/esmo/sp/response.php/esmo"
+                "apiEndpoint": "https://esmoGateway/ESMO/module.php/esmo/sp/response.php/esmo"
             },
             {
                 "apiClass": "IDP",
                 "apiCall": "authenticate",
                 "apiConnectionType": "post",
-                "apiEndpoint": "https://esmo.uji.es/ESMO/module.php/esmo/idp/authenticate.php/eidas"
+                "apiEndpoint": "https://esmoGateway/ESMO/module.php/esmo/idp/authenticate.php/eidas"
             }
         ]
     },
@@ -40,25 +40,25 @@
                 "apiClass": "CM",
                 "apiCall": "microservices",
                 "apiConnectionType": "get",
-                "apiEndpoint": "http://esmo.uji.es:8080/cm/metadata/microservices"
+                "apiEndpoint": "http://esmoGateway:8080/cm/metadata/microservices"
             },
             {
                 "apiClass": "CM",
                 "apiCall": "externalEntities",
                 "apiConnectionType": "get",
-                "apiEndpoint": "http://esmo.uji.es:8080/cm/metadata/externalEntities"
+                "apiEndpoint": "http://esmoGateway:8080/cm/metadata/externalEntities"
             },
             {
                 "apiClass": "CM",
                 "apiCall": "attributes",
                 "apiConnectionType": "get",
-                "apiEndpoint": "http://esmo.uji.es:8080/cm/metadata/attributes"
+                "apiEndpoint": "http://esmoGateway:8080/cm/metadata/attributes"
             },
             {
                 "apiClass": "CM",
                 "apiCall": "internal",
                 "apiConnectionType": "get",
-                "apiEndpoint": "http://esmo.uji.es:8080/cm/metadata/internal"
+                "apiEndpoint": "http://esmoGateway:8080/cm/metadata/internal"
             }
         ]
     },
@@ -76,13 +76,13 @@
                 "apiClass": "ACM",
                 "apiCall": "acmRequest",
                 "apiConnectionType": "post",
-                "apiEndpoint": "https://esmo.uji.es:8073/acm/request"
+                "apiEndpoint": "https://esmoGateway:8073/acm/request"
             },
             {
                 "apiClass": "ACM",
                 "apiCall": "acmResponse",
                 "apiConnectionType": "post",
-                "apiEndpoint": "https://esmo.uji.es:8073/acm/response"
+                "apiEndpoint": "https://esmoGateway:8073/acm/response"
             }
         ]
     },
@@ -97,13 +97,13 @@
                 "apiClass": "GW",
                 "apiCall": "query",
                 "apiConnectionType": "post",
-                "apiEndpoint": "https://esmo.uji.es:8053/gw/query"
+                "apiEndpoint": "https://esmoGateway:8053/gw/query"
             },
             {
                 "apiClass": "GW",
                 "apiCall": "handleResponse",
                 "apiConnectionType": "post",
-                "apiEndpoint": "https://esmo.uji.es:8053/gw/response"
+                "apiEndpoint": "https://esmoGateway:8053/gw/response"
             }
         ]
     },
@@ -120,43 +120,43 @@
                 "apiClass": "SM",
                 "apiCall": "endSession",
                 "apiConnectionType": "post",
-                "apiEndpoint": "http://esmo.uji.es:8090/sm/endSession"
+                "apiEndpoint": "http://esmoGateway:8090/sm/endSession"
             },
             {
                 "apiClass": "SM",
                 "apiCall": "generateToken",
                 "apiConnectionType": "get",
-                "apiEndpoint": "http://esmo.uji.es:8090/sm/generateToken"
+                "apiEndpoint": "http://esmoGateway:8090/sm/generateToken"
             },
             {
                 "apiClass": "SM",
                 "apiCall": "getSession",
                 "apiConnectionType": "get",
-                "apiEndpoint": "http://esmo.uji.es:8090/sm/getSession"
+                "apiEndpoint": "http://esmoGateway:8090/sm/getSession"
             },
             {
                 "apiClass": "SM",
                 "apiCall": "getSessionData",
                 "apiConnectionType": "get",
-                "apiEndpoint": "http://esmo.uji.es:8090/sm/getSessionData"
+                "apiEndpoint": "http://esmoGateway:8090/sm/getSessionData"
             },
             {
                 "apiClass": "SM",
                 "apiCall": "startSession",
                 "apiConnectionType": "post",
-                "apiEndpoint": "http://esmo.uji.es:8090/sm/startSession"
+                "apiEndpoint": "http://esmoGateway:8090/sm/startSession"
             },
             {
                 "apiClass": "SM",
                 "apiCall": "updateSessionData",
                 "apiConnectionType": "post",
-                "apiEndpoint": "http://esmo.uji.es:8090/sm/updateSessionData"
+                "apiEndpoint": "http://esmoGateway:8090/sm/updateSessionData"
             },
             {
                 "apiClass": "SM",
                 "apiCall": "validateToken",
                 "apiConnectionType": "get",
-                "apiEndpoint": "http://esmo.uji.es:8090/sm/validateToken"
+                "apiEndpoint": "http://esmoGateway:8090/sm/validateToken"
             }
         ]
     },

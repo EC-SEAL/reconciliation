@@ -573,7 +573,7 @@ definitions:
       entityId:
         description: Unique identifier of the entity, usually a metadata url
         type: string
-        example: "https://esmo.uji.es/gw/saml/idp/metadata.xml"
+        example: "https://esmoGateway/gw/saml/idp/metadata.xml"
       defaultDisplayName:
         description: Name to be displayed on UI, in the default language/encoding
         type: string
@@ -666,7 +666,7 @@ definitions:
       url:
         description: Access url of the endpoint
         type: string
-        example: "https://esmo.uji.es/gw/saml/idp/SSOService.php"
+        example: "https://esmoGateway/gw/saml/idp/SSOService.php"
 
 
   securityKeyType:
@@ -756,11 +756,11 @@ definitions:
       issuer:
         description: ID of the External Entity which issued the set
         type: string
-        example: "https://esmo.uji.es/gw/saml/idp/metadata.xml"
+        example: "https://esmoGateway/gw/saml/idp/metadata.xml"
       recipient:
         description: ID of the External Entity which the set is addressed to
         type: string
-        example: "https://esmo.uji.es/gw/saml/sp/metadata.xml"
+        example: "https://esmoGateway/gw/saml/sp/metadata.xml"
       inResponseTo:
         description: In response objects, the ID of the request which the set is responding to
         type: string

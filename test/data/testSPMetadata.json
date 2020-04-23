@@ -9,7 +9,7 @@
   ],
   "endpoints": [
     {
-      "url": "http://lab9054.inv.uji.es/~paco/clave/secure.php",
+      "url": "http://myClient/~paco/clave/secure.php",
       "type": "AssertionConsumerService",
       "method": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
     }

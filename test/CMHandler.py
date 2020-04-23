@@ -3,6 +3,9 @@ import unittest
 
 from lib.CMHandler import CMHandler
 
+# Before running these tests, you need urls to point to a properly functioning
+# Config Manager microservice. Either substitute here the domain in the urls
+# or set configManager to be resolved in your /etc/hosts file to the proper domain
 
 class CMHandlerTest(unittest.TestCase):
 
@@ -18,8 +21,7 @@ class CMHandlerTest(unittest.TestCase):
         pass
 
     def testRemoteGet(self):
-        # ms_url = "http://esmo.uji.es:8080/cm/metadata/microservices"
-        ms_url = "http://lab9054.inv.uji.es/~paco/seal/msmetadata.json"
+        ms_url = "http://configManager:8080/cm/metadata/microservices"
         cm = CMHandler('data/', key='data/httpsig_key_esmo.pem', lifetime=3, ms_source_url=ms_url)
         sm = cm.get_microservice_by_api('SM')
 

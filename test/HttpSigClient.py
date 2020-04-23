@@ -4,6 +4,10 @@
 # These tests will most probably fail for you, as they rely on a specific service being up and you
 # having a RSA private key that is not on the repository.  # TODO: try to make them self-sustainable
 
+# Before running these tests, you need urls to point to a properly functioning
+# SessionManager microservice. Either substitute here the domain in the urls 
+# or set sessionManager to be resolved in your /etc/hosts file to the proper domain
+
 import hashlib
 import json
 import unittest
@@ -55,7 +59,7 @@ class HttpSigTest(unittest.TestCase):
         c.debug(True)
         c.validateResponse(False)
 
-        res = c.postForm("http://esmo.uji.es:8090/sm/startSession")
+        res = c.postForm("http://sessionManager:8090/sm/startSession")
         res = json.loads(res.text)
         sessionId = res['sessionData']['sessionId']
         self.assertIsNotNone(sessionId)
@@ -66,13 +70,13 @@ class HttpSigTest(unittest.TestCase):
             'variableName': 'testvar',
             'dataObject': 'testvalue',
         }
-        res = c.postJson('http://esmo.uji.es:8090/sm/updateSessionData', body)
+        res = c.postJson('http://sessionManager:8090/sm/updateSessionData', body)
         smres = SessionMngrResponse()
         smres.json_unmarshall(res.text)
         self.assertNotEqual(smres.code, SessionMngrCode.ERROR)
 
         try:
-            res = c.get("http://esmo.uji.es:8090/sm/endSession?sessionId=" + sessionId)
+            res = c.get("http://sessionManager:8090/sm/endSession?sessionId=" + sessionId)
         except HttpError as err:
             self.assertEqual(True, False)
 
