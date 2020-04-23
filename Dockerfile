@@ -1,3 +1,6 @@
+# docker build -t seal-reconciliation .
+# docker run -p 8080:8080 -v "local/path/to/data:/app/data" --env PROPERTIES_FILE=/app/data/server.properties --env ENCRYPTION_KEY=sessiondatabasenecryptionkey --name seal-reconciliation seal-reconciliation:latest
+
 FROM python:latest
 
 MAINTAINER Universitat Jaume I
