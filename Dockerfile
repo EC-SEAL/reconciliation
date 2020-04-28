@@ -1,15 +1,17 @@
 # docker build -t seal-reconciliation .
-# docker run -p 8080:8080 -v "local/path/to/data:/app/data" --env PROPERTIES_FILE=/app/data/server.properties --env ENCRYPTION_KEY=sessiondatabasenecryptionkey --name seal-reconciliation seal-reconciliation:latest
+# docker run -p 8050:8050 -v "local/path/to/data:/app/data" --env PROPERTIES_FILE=/app/data/server.properties --env ENCRYPTION_KEY=sessiondatabasenecryptionkey --name seal-reconciliation seal-reconciliation:latest
 
 FROM python:latest
 
 MAINTAINER Universitat Jaume I
 LABEL Author="Francisco Aragó"
 LABEL E-mail="farago@uji.es"
-LABEL version="0.0.1a"
+LABEL version="0.0.1b"
 
 ENV PROPERTIES_FILE "server.properties"
 ENV ENCRYPTION_KEY "sessiondatabasenecryptionkey"
+ENV MSPORT 8050
+ENV WTHREADS 4
 
 # Prevent generating .pyc files # TODO: allow pyc?
 # ENV PYTHONDONTWRITEBYTECODE 1
@@ -31,7 +33,7 @@ RUN pip install --upgrade pip && \
 VOLUME ./data /app/data
 
 
-EXPOSE 8080
+EXPOSE $MSPORT
 
 # For debug, run with flask
 #CMD flask run --host=0.0.0.0
@@ -39,7 +41,7 @@ EXPOSE 8080
 # Production
 
 # To run with SSL
-#CMD gunicorn -w 4 -b 0.0.0.0:8080 --certfile=server.crt --keyfile=server.key app:app
+#CMD gunicorn -w 4 -b 0.0.0.0:8050 --certfile=server.crt --keyfile=server.key app:app
 
 # To run without SSL
-CMD gunicorn -w 4 -b 0.0.0.0:8080 app:app
+CMD gunicorn -w $WTHREADS -b 0.0.0.0:$MSPORT app:app

@@ -1,7 +1,7 @@
-# http://localhost:8080/test/client/submit
-# http://localhost:8080/test/client/status/28902ec5-8930-4d03-bea4-6347b6b0a793
-# http://localhost:8080/test/client/cancel/c625249b-a662-493d-8825-2626ad94d0ba
-# http://localhost:8080/test/client/response/aca89ce0-ac1a-4f58-985d-9c0aad49fc6a
+# http://localhost:8050/test/client/submit
+# http://localhost:8050/test/client/status/28902ec5-8930-4d03-bea4-6347b6b0a793
+# http://localhost:8050/test/client/cancel/c625249b-a662-493d-8825-2626ad94d0ba
+# http://localhost:8050/test/client/response/aca89ce0-ac1a-4f58-985d-9c0aad49fc6a
 
 from flask import render_template, Response
 
@@ -136,7 +136,7 @@ def test_client_getresult_linking_request(request_id=None):
 # Start a linking request
 #   to <idp> [Discovery, PDS, uportSSIwallet, eIDAS, eduGAIN]
 #   of <type> [auth_request, data_query]
-# http://localhost:8080/test/client/sp/eduGAIN/auth_request
+# http://localhost:8050/test/client/sp/eduGAIN/auth_request
 @app.route('/test/client/sp/<idp>/<type>', methods=['GET'])
 def test_client_submit_auth_request(idp, type):
 
