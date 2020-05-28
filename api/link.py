@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
+import os
 import uuid
 
 from flask import Response, request
@@ -9,12 +10,11 @@ import logging
 from config import config
 from definitions import DEFAULT_DATA_DIR
 from engine import app
-from lib.CMHandler import CMHandler
-from lib.SMHandler import SMHandler, SessionManagerError
+from lib.Microservice import session_manager_handler, redirect_return
+from lib.SMHandler import SessionManagerError
 from lib.Tools import load_json_file
 from lib.dto.Dataset import Dataset
 from lib.dto.LinkRequest import LinkRequest
-from lib.dto.MsMetadata import MsMetadata
 from lib.dto.StatusResponse import StatusResponse, StatusCodes
 from lib.reconciliation import Reconciliation
 import database
@@ -49,25 +49,22 @@ httpsig_key_id = config.get('HTTPSig', 'key_id', fallback=None)
 # As SM sometimes fails to validate signature, we retry the connection for resilience
 httpsig_send_retries = config.getint('HTTPSig', 'retries', fallback=1)
 
-# Config Manager ms metadata url
+# Config Manager ms metadata url (env var overrides)
 ms_metadata_url = config.get('CM', 'url', fallback=None)
+ms_metadata_url = os.getenv('MSMETADATAURL', ms_metadata_url)
 
 # Config Manager ms metadata url
 cm_cache_lifetime = config.getint('CM', 'cache_lifetime', fallback=None)
 
+# Names of microservices
+msID = config.get('App', 'msID', fallback="")
+apigwID = config.get('App', 'apigwID', fallback="")
 
-# Get SM ms_metadata object
-def session_manager():
-    cm = CMHandler(data_dir,
-                   ms_source_url=ms_metadata_url,
-                   key=httpsig_private_key,
-                   lifetime=cm_cache_lifetime)
-    sm = cm.get_microservice_by_api('SM')
-    smh = SMHandler(sm,
-                    key=httpsig_private_key,
-                    retries=httpsig_send_retries,
-                    validate=False)
-    return smh
+
+def get_session_manager():
+    return session_manager_handler(data_dir, ms_metadata_url,
+                                   httpsig_private_key, cm_cache_lifetime,
+                                   httpsig_send_retries)
 
 
 # API Endpoints
@@ -80,11 +77,16 @@ def submit_linking_request():
     if 'msToken' not in request.form:
         return "missing msToken POST parameter or bad content-type", 404
     msToken = request.form['msToken']
-    smh = session_manager()
+    smh = get_session_manager()
     try:
         smh.validateToken(msToken)
     except SessionManagerError as err:
         return "Error validating msToken: " + str(err), 403
+
+    try:
+        dest_url = smh.getSessionVar('ClientCallbackAddr')
+    except SessionManagerError as err:
+        return "Error retrieving ClientCallbackAddr from SM: " + str(err), 403
 
     # Load mappings to apply
     mappings_dicts = load_json_file(data_dir + 'attributeMaps.json')
@@ -95,7 +97,8 @@ def submit_linking_request():
     try:
         link_req = smh.getSessionVar('linkRequest')
     except SessionManagerError as err:
-        return "Error retrieving linkRequest from SM: " + str(err), 403
+        # return "Error retrieving linkRequest from SM: " + str(err), 403
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Error retrieving linkRequest from SM: " + str(err))
     req = LinkRequest()
     req.json_unmarshall(link_req)
 
@@ -134,13 +137,16 @@ def submit_linking_request():
 
     # We also overwrite it in SM session
     try:
-        smh.writeSessionVar(req.marshall(), 'linkRequest')
+        smh.writeSessionVar(req.marshall(), 'linkRequest') # TODO: expected variable?
     except SessionManagerError as err:
-        return "Error writing updated linkRequest to SM: " + str(err), 403
+        # return "Error writing updated linkRequest to SM: " + str(err), 403
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Error writing updated linkRequest to SM: " + str(err))
 
-    return Response(request_json,
-                    status=200,
-                    mimetype='application/json')
+
+    # return Response(request_json,
+    #                status=200,
+    #                mimetype='application/json')
+    return redirect_return(smh, dest_url, 'OK', msID, apigwID)
 
 
 # TODO: SEGUIR:
@@ -167,8 +173,8 @@ def linking_request_status(request_id):
         return "Request does not belong to the authenticated user", 403
 
     resp = StatusResponse()
-    resp.primaryCode = req.status
-    resp.secondaryCode = None
+    resp.primaryCode = 'OK'
+    resp.secondaryCode = req.status
     resp.message = None
     return Response(resp.json_marshall(),
                     status=200,
@@ -183,24 +189,37 @@ def cancel_linking_request(request_id):
     if 'msToken' not in request.form:
         return "missing msToken POST parameter or bad content-type", 404
     msToken = request.form['msToken']
-    smh = session_manager()
+    smh = get_session_manager()
     try:
         smh.validateToken(msToken)
     except SessionManagerError as err:
         return "Error validating msToken: " + str(err), 403
 
+    try:
+        dest_url = smh.getSessionVar('ClientCallbackAddr')
+    except SessionManagerError as err:
+        return "Error retrieving ClientCallbackAddr from SM: " + str(err), 403
+
     req = get_request(request_id)
     if not req:
-        return "Request ID not found", 403
+        # return "Request ID not found", 403
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Request ID not found")
+
 
     if not check_owner(smh.sessId, req.request_owner):
-        return "Request does not belong to the authenticated user", 403
+        # return "Request does not belong to the authenticated user", 403
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Request does not belong to the authenticated user")
+
 
     try:
         delete_request(request_id)
-        return "Request Deleted", 200
+        # return "Request Deleted", 200
+        return redirect_return(smh, dest_url, 'OK', msID, apigwID)
+
     except RegisterNotFound:
-        return "Request not found", 403
+        # return "Request not found", 403
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Request not found")
+
 
 
 @app.route('/link/<request_id>/result/get', methods=['POST'])
@@ -211,21 +230,30 @@ def linking_request_result(request_id):
     if 'msToken' not in request.form:
         return "missing msToken POST parameter or bad content-type", 404
     msToken = request.form['msToken']
-    smh = session_manager()
+    smh = get_session_manager()
     try:
         smh.validateToken(msToken)
     except SessionManagerError as err:
         return "Error validating msToken: " + str(err), 403
 
+    try:
+        dest_url = smh.getSessionVar('ClientCallbackAddr')
+    except SessionManagerError as err:
+        return "Error retrieving ClientCallbackAddr from SM: " + str(err), 403
+
     req = get_request(request_id)
     if not req:
-        return "Request ID not found", 403
+        # return "Request ID not found", 403
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Request ID not found")
 
     if not check_owner(smh.sessId, req.request_owner):
-        return "Request does not belong to the authenticated user", 403
+        # return "Request does not belong to the authenticated user", 403
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Request does not belong to the authenticated user")
 
     if req.status != "ACCEPTED":
-        return "Linking request was not accepted", 403
+        # return "Linking request was not accepted", 403
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Linking request was not accepted")
+
 
     # Calculate expiration date
     expiration = None
@@ -258,7 +286,8 @@ def linking_request_result(request_id):
     try:
         smh.writeSessionVar(result.marshall(), 'linkRequest')
     except SessionManagerError as err:
-        return "Error writing updated linkRequest to SM: " + str(err), 403
+        # return "Error writing updated linkRequest to SM: " + str(err), 403
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Error writing updated linkRequest to SM: " + str(err))
 
     # TODO: add the response to the datastore in session
 
@@ -267,9 +296,10 @@ def linking_request_result(request_id):
     except RegisterNotFound:
         logging.warning("This should not happen. Can't delete a register I have just read")
 
-    return Response(result_json,
-                    status=200,
-                    mimetype='application/json')
+    # return Response(result_json,
+    #                status=200,
+    #                mimetype='application/json')
+    return redirect_return(smh, dest_url, 'OK', msID, apigwID)
 
 
 # As this is an automated matching module, there is no interaction with the user,

@@ -14,7 +14,7 @@
       "friendlyName": null,
       "encoding": null,
       "language": null,
-      "isMandatory": true,
+      "mandatory": true,
       "values": null
     },
     {
@@ -22,7 +22,7 @@
       "friendlyName": null,
       "encoding": null,
       "language": null,
-      "isMandatory": true,
+      "mandatory": true,
       "values": null
     },
     {
@@ -30,7 +30,7 @@
       "friendlyName": null,
       "encoding": null,
       "language": null,
-      "isMandatory": true,
+      "mandatory": true,
       "values": null
     }
   ],

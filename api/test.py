@@ -2,6 +2,7 @@
 # http://localhost:8050/test/client/status/28902ec5-8930-4d03-bea4-6347b6b0a793
 # http://localhost:8050/test/client/cancel/c625249b-a662-493d-8825-2626ad94d0ba
 # http://localhost:8050/test/client/response/aca89ce0-ac1a-4f58-985d-9c0aad49fc6a
+import os
 
 from flask import render_template, Response
 
@@ -20,6 +21,8 @@ data_dir = config.get('Configuration', 'dir')
 port = config.get('Server', 'port')
 key_file = config.get('HTTPSig', 'private_key')
 cm_url = config.get('CM', 'url')
+cm_url = os.getenv('MSMETADATAURL', cm_url)
+
 
 client_key_file = config.get('TestClient', 'cli_key')
 trusted_key = config.get('TestClient', 'trusted_key')

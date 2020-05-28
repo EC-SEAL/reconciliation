@@ -47,7 +47,11 @@ class SMHandler:
 
     def setSessID(self, sessId):
         self.sessId = sessId
-
+    # TODO: add something here that parses the domain (and port? just domain I think)
+    #  part of the retrieved url, as a kind of pre-dns resolver. This way, we can
+    #  change the domain in there for a given domain or ip. Test this by commenting
+    #  the etc/hosts stuff, see that fails, then pass this and see it work.
+    #  use urllib.parse 
     def _getApiUrl(self, apiClass, apiCall):
         for api in self.smMetadata.publishedAPI:
             if api.apiClass == apiClass and api.apiCall == apiCall:
