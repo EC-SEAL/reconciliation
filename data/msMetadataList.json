@@ -157,6 +157,36 @@
         "apiCall": "validateToken",
         "apiConnectionType": "get",
         "apiEndpoint": "http://esmoGateway:8090/sm/validateToken"
+      },
+      {
+        "apiClass": "SM",
+        "apiCall": "datastoreStart",
+        "apiConnectionType": "get",
+        "apiEndpoint": "http://esmoGateway:8090/sm/new/startSession"
+      },
+      {
+        "apiClass": "SM",
+        "apiCall": "datastoreAdd",
+        "apiConnectionType": "post",
+        "apiEndpoint": "http://esmoGateway:8090/sm/new/add"
+      },
+      {
+        "apiClass": "SM",
+        "apiCall": "datastoreDelete",
+        "apiConnectionType": "get",
+        "apiEndpoint": "http://esmoGateway:8090/sm/new/delete"
+      },
+      {
+        "apiClass": "SM",
+        "apiCall": "datastoreGet",
+        "apiConnectionType": "get",
+        "apiEndpoint": "http://esmoGateway:8090/sm/new/get"
+      },
+      {
+        "apiClass": "SM",
+        "apiCall": "datastoreSearch",
+        "apiConnectionType": "get",
+        "apiEndpoint": "http://esmoGateway:8090/sm/new/search"
       }
     ]
   },

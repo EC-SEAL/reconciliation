@@ -4,6 +4,15 @@
 # http://localhost:8050/test/client/response/aca89ce0-ac1a-4f58-985d-9c0aad49fc6a
 import os
 
+# TODO: update this script to:
+#   - register a callback url
+#   - validate the msToken on the callback
+#   - get the response status
+#   - display the likRequest, etc, by reading the variables from the SM.
+
+# TODO: check if sameSite= None is being set
+
+
 from flask import render_template, Response
 
 from engine import app

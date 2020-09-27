@@ -4,8 +4,11 @@ from urllib.parse import urlencode
 
 from lib import Tools
 from lib.dto import MsMetadata
+from lib.dto.Dataset import Dataset
 from lib.dto.Dto import BadDtoInput
+from lib.dto.LinkRequest import LinkRequest
 from lib.dto.SessionMngrResponse import SessionMngrCode, SessionMngrResponse
+from lib.dto.StoreEntry import StoreEntry, StoreEntryList
 from lib.httpsig.HttpSig import HttpSig, HttpError
 from lib.httpsig.HttpSigClient import HttpSigClient
 
@@ -222,3 +225,161 @@ class SMHandler:
             logging.debug('it had additionalData: ' + res.additionalData)
 
         return res.additionalData
+
+# The new dataStore API implemented on the SM
+
+    # Erases all the contents of the datastore if exists and sets it ready for operation
+    def resetDatastore(self):
+        url = self._getApiUrl('SM', 'datastoreStart')  # TODO: set the proper identifiers on the ms.json
+
+        # We assume the session exists before the dataStore is
+        # created, but the call also supports creating a dataStore
+        # which is independent from the session, by not passing a sessionID
+        queryParams = {'sessionId': self.sessId}
+
+        res = self.httpsig.postForm(url, queryParams)
+        res = self._parseResponse(res)
+        logging.debug('resetDatastore Response: ' + str(res))
+
+        if res.code == SessionMngrCode.ERROR:
+            raise SessionManagerError("Datastore reset failed: " + str(res.error))
+
+        if not res.sessionData.sessionId:
+            raise SessionManagerError("No sessionID on response (should be the same)")
+        self.sessId = res.sessionData.sessionId
+
+        return self.sessId
+
+    # TODO: SEGUIR
+
+    def addDatastoreEntry(self, id, type, data):
+
+        logging.debug('Writing dataStore entry. id: ' + id + ' type: '
+                      + type + ' data: ' + str(data))
+
+        json_value = data
+        if isinstance(data, dict):
+            json_value = json.dumps(data)
+        if not json_value:
+            raise SessionManagerError("Error encoding data of entry in json: " + data)
+
+        body = {
+            'sessionId': self.sessId,
+            'id': id,
+            'type': type,
+            'data': json_value,
+        }
+
+        url = self._getApiUrl('SM', 'datastoreAdd')
+
+        logging.debug('Body sent:' + str(body))
+        res = self.httpsig.postForm(url, body)
+        res = self._parseResponse(res)
+        logging.debug('Received response:' + str(res))
+
+        if res.code == SessionMngrCode.ERROR:
+            raise SessionManagerError("storeEntry -" + id + "-" + type + "- write failed: " + str(res.error))
+
+    def deleteDatastoreEntry(self, id):
+
+        logging.debug('Deleting dataStore entry. id: ' + id)
+
+        body = {
+            'sessionId': self.sessId,
+            'id': id,
+        }
+
+        url = self._getApiUrl('SM', 'datastoreDelete')
+
+        logging.debug('Body sent:' + str(body))
+        res = self.httpsig.postForm(url, body)
+        res = self._parseResponse(res)
+        logging.debug('Received response:' + str(res))
+
+        if res.code == SessionMngrCode.ERROR:
+            raise SessionManagerError("storeEntry -" + id + "- delete failed: " + str(res.error))
+
+    def getDatastoreEntry(self, id):
+        logging.debug('Requesting datastore entry:' + id)
+        queryParams = {'sessionId': self.sessId,
+                       'id': id,
+        }
+        url = self._getApiUrl('SM', 'datastoreGet') + "?" + urlencode(queryParams)
+
+        res = self.httpsig.get(url)
+        res = self._parseResponse(res)
+        logging.debug('Received response:' + str(res))
+
+        if res.code != SessionMngrCode.OK:
+            raise SessionManagerError("store entry fetch failed: " + str(res.error))
+
+        if not res.additionalData:
+            raise SessionManagerError("No additionalData on response")
+
+        storeObj = StoreEntry()
+        storeObj.json_unmarshall(res.additionalData)
+
+        if not storeObj.id:
+            raise SessionManagerError("store entry fetch failed: no data id")
+        if not storeObj.type:
+            raise SessionManagerError("store entry fetch failed: no data type")
+        if not storeObj.data:
+            raise SessionManagerError("store entry fetch failed: no data object")
+
+        if storeObj.type == "linkRequest":  # TODO: parametrise and check the types of object
+            obj = LinkRequest()
+        elif storeObj.type == "dataSet":
+            obj = Dataset()
+        else:
+            raise SessionManagerError("Unknown store entry type: " + storeObj.type)
+
+        obj.json_unmarshall(storeObj.data)
+        storeObj.data = obj
+
+        return storeObj
+
+    # Return all entries of a type (or all entries if type is none)
+    def searchDatastoreEntries(self, type=None):
+        if not type:
+            logging.debug('Searching all datastore entries')
+        else:
+            logging.debug('Searching datastore entries of type:' + type)
+        queryParams = {'sessionId': self.sessId,
+                       'type': type,
+                       }
+        url = self._getApiUrl('SM', 'datastoreSearch') + "?" + urlencode(queryParams)
+
+        res = self.httpsig.get(url)
+        res = self._parseResponse(res)
+        logging.debug('Received response:' + str(res))
+
+        if res.code != SessionMngrCode.OK:
+            raise SessionManagerError("store entry search failed: " + str(res.error))
+
+        if not res.additionalData:
+            raise SessionManagerError("No additionalData on response")
+
+        storeObjList = StoreEntryList()
+        storeObjList.json_unmarshall(res.additionalData)
+
+        idx = 0
+        for storeObj in storeObjList.entries:
+            if not storeObj.id:
+                raise SessionManagerError("store entry search failed: no data id at idx " + str(idx))
+            if not storeObj.type:
+                raise SessionManagerError("store entry search failed: no data type at idx " + str(idx))
+            if not storeObj.data:
+                raise SessionManagerError("store entry search failed: no data object at idx " + str(idx))
+
+            if storeObj.type == "linkRequest":  # TODO: parametrise and check the types of object
+                obj = LinkRequest()
+            elif storeObj.type == "dataSet":
+                obj = Dataset()
+            else:
+                raise SessionManagerError("Unknown store entry type: " + storeObj.type + " at idx " + str(idx))
+
+            obj.json_unmarshall(storeObj.data)
+            storeObj.data = obj
+            idx += 1
+
+        return storeObjList

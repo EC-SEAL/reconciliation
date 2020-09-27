@@ -9,7 +9,7 @@
         "issuer": null,
         "categories": [],
         "attributes": [
-          "$CurrentGivenName",
+          "$GivenName",
           " ",
           "$FamilyName"
         ],

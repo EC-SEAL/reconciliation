@@ -1,6 +1,8 @@
 #IDE
 .idea
 venv/
+venv2/
+
 
 #Varios
 *~

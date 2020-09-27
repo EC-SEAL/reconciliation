@@ -20,7 +20,7 @@
     "attributes": [
       {
         "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName",
-        "friendlyName": "CurrentGivenName",
+        "friendlyName": "GivenName",
         "encoding": "plain",
         "language": null,
         "mandatory": true,
