@@ -6,12 +6,14 @@ import os
 import json
 import re
 import time
-from requests import Request
+from urllib.parse import urlencode
 
+from requests import Request
 
 import yaml
 
 from definitions import ROOT_DIR
+from lib.dto.Dataset import Dataset
 
 
 def load_json_file(file_path, encoding='utf8'):
@@ -58,5 +60,54 @@ def get_swagger_spec(spec_filepath):
     with open(spec_path, 'r') as spec:
         return yaml.load(spec.read(), yaml.Loader)
 
+
 #  seal_yaml = get_swagger_spec("swagger/seal_ms_reconciliation.yaml")
 #
+
+
+def build_store_id_from_req(module, issuer, datasetA, datasetB):
+    subjectA = indirect_search(datasetA.subjectId, datasetA)
+    issuerA = indirect_search(datasetA.issuerId, datasetA)
+    subjectB = indirect_search(datasetB.subjectId, datasetB)
+    issuerB = indirect_search(datasetB.issuerId, datasetB)
+    return build_store_id(module, issuer, subjectA, issuerA, subjectB, issuerB)
+
+
+def build_store_id(module, linkIssuer, subjectA, issuerA, subjectB, issuerB):
+    if not module:
+        raise Exception("No module name provided")
+    if not linkIssuer:
+        raise Exception("No link issuer name provided")
+    if not subjectA:
+        raise Exception("No subject A id provided")
+    if not issuerA:
+        raise Exception("No issuer A id provided")
+    if not subjectB:
+        raise Exception("No subject B id provided")
+    if not issuerB:
+        raise Exception("No issuer B id provided")
+
+    module_id = urlencode(module)
+    linkIssuer_id = urlencode(linkIssuer)
+
+    identityA = f"{urlencode(subjectA)}:{urlencode(issuerA)}"
+    identityB = f"{urlencode(subjectB)}:{urlencode(issuerB)}"
+
+    # Id must be commutative for the two implied identities, we set them in alphabetic order
+    if identityA <= identityB:
+        firstIdentity = identityA
+        secondIdentity = identityB
+    else:
+        firstIdentity = identityB
+        secondIdentity = identityA
+
+    return f"urn:mace:project-seal.eu:id:{module_id}:{linkIssuer_id}:{firstIdentity}:{secondIdentity}"
+
+
+# Search the first value of a given attribute in the dataSet
+def indirect_search(key, dataSet):
+    for attr in dataSet.attributes:
+        if key in {attr.friendlyName, attr.name}:
+            return attr.values[0]
+    return None
+

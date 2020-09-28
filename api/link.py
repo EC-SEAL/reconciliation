@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 import os
 import uuid
+from urllib.parse import urlencode
 
 from flask import Response, request
 from datetime import datetime, timedelta
@@ -12,7 +13,7 @@ from definitions import DEFAULT_DATA_DIR
 from engine import app
 from lib.Microservice import session_manager_handler, redirect_return
 from lib.SMHandler import SessionManagerError
-from lib.Tools import load_json_file
+from lib.Tools import load_json_file, build_store_id, indirect_search, build_store_id_from_req
 from lib.dto.Dataset import Dataset
 from lib.dto.LinkRequest import LinkRequest
 from lib.dto.StatusResponse import StatusResponse, StatusCodes
@@ -98,7 +99,8 @@ def submit_linking_request():
         link_req = smh.getSessionVar('linkRequest')
     except SessionManagerError as err:
         # return "Error retrieving linkRequest from SM: " + str(err), 403
-        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Error retrieving linkRequest from SM: " + str(err))
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
+                               "Error retrieving linkRequest from SM: " + str(err))
     req = LinkRequest()
     req.json_unmarshall(link_req)
 
@@ -131,17 +133,25 @@ def submit_linking_request():
     session.commit()
     session.close()
 
-    # Fill in the requestID and return the request object
+    # Fill in the requestID and store the request object in the dataStore
     req.id = request_id
     request_json = req.json_marshall()
 
+    try:
+        # Build the unique persistent storeEntry identifier # TODO: parametrise module name (search more incidences)
+        entry_id = build_store_id_from_req("seal-autorecon", issuer, req.datasetA, req.datasetB)
+        smh.addDatastoreEntry(entry_id, "linkRequest", req.marshall())  # TODO: parametrise type
+    except SessionManagerError as err:
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
+                               "Error writing updated linkRequest to dataStore: " + str(err))
+
     # We also overwrite it in SM session
     try:
-        smh.writeSessionVar(req.marshall(), 'linkRequest') # TODO: expected variable?
+        smh.writeSessionVar(req.marshall(), 'linkRequest')  # TODO: expected variable?
     except SessionManagerError as err:
         # return "Error writing updated linkRequest to SM: " + str(err), 403
-        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Error writing updated linkRequest to SM: " + str(err))
-
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
+                               "Error writing updated linkRequest to SM: " + str(err))
 
     # return Response(request_json,
     #                status=200,
@@ -205,11 +215,18 @@ def cancel_linking_request(request_id):
         # return "Request ID not found", 403
         return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Request ID not found")
 
-
     if not check_owner(smh.sessId, req.request_owner):
         # return "Request does not belong to the authenticated user", 403
-        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Request does not belong to the authenticated user")
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
+                               "Request does not belong to the authenticated user")
 
+    # First we delete it from the dataStore by rebuilding the persistent ID
+    try:
+        entry_id = build_store_id_from_req("seal-autorecon", issuer, req.datasetA, req.datasetB) # TODO: change when the module is parametrised
+        smh.deleteDatastoreEntry(entry_id)
+    except SessionManagerError as err:
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
+                               "Error writing updated linkRequest to dataStore: " + str(err))
 
     try:
         delete_request(request_id)
@@ -219,7 +236,6 @@ def cancel_linking_request(request_id):
     except RegisterNotFound:
         # return "Request not found", 403
         return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Request not found")
-
 
 
 @app.route('/link/<request_id>/result/get', methods=['POST'])
@@ -248,12 +264,12 @@ def linking_request_result(request_id):
 
     if not check_owner(smh.sessId, req.request_owner):
         # return "Request does not belong to the authenticated user", 403
-        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Request does not belong to the authenticated user")
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
+                               "Request does not belong to the authenticated user")
 
     if req.status != "ACCEPTED":
         # return "Linking request was not accepted", 403
         return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Linking request was not accepted")
-
 
     # Calculate expiration date
     expiration = None
@@ -287,9 +303,16 @@ def linking_request_result(request_id):
         smh.writeSessionVar(result.marshall(), 'linkRequest')
     except SessionManagerError as err:
         # return "Error writing updated linkRequest to SM: " + str(err), 403
-        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Error writing updated linkRequest to SM: " + str(err))
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
+                               "Error writing updated linkRequest to SM: " + str(err))
 
-    # TODO: add the response to the datastore in session
+    try:
+        # Build the unique persistent storeEntry identifier # TODO: parametrise module name (search more incidences)
+        entry_id = build_store_id_from_req("seal-autorecon", issuer, result.datasetA, result.datasetB)
+        smh.addDatastoreEntry(entry_id, "linkRequest", result.marshall())  # TODO: parametrise type
+    except SessionManagerError as err:
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
+                               "Error writing updated linkRequest to dataStore: " + str(err))
 
     try:
         delete_request(request_id)
