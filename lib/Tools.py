@@ -6,7 +6,7 @@ import os
 import json
 import re
 import time
-from urllib.parse import urlencode
+from urllib.parse import quote
 
 from requests import Request
 
@@ -87,11 +87,11 @@ def build_store_id(module, linkIssuer, subjectA, issuerA, subjectB, issuerB):
     if not issuerB:
         raise Exception("No issuer B id provided")
 
-    module_id = urlencode(module)
-    linkIssuer_id = urlencode(linkIssuer)
+    module_id = quote(module)
+    linkIssuer_id = quote(linkIssuer)
 
-    identityA = f"{urlencode(subjectA)}:{urlencode(issuerA)}"
-    identityB = f"{urlencode(subjectB)}:{urlencode(issuerB)}"
+    identityA = f"{quote(subjectA)}:{quote(issuerA)}"
+    identityB = f"{quote(subjectB)}:{quote(issuerB)}"
 
     # Id must be commutative for the two implied identities, we set them in alphabetic order
     if identityA <= identityB:
