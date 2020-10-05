@@ -222,11 +222,15 @@ def cancel_linking_request(request_id):
 
     # First we delete it from the dataStore by rebuilding the persistent ID
     try:
-        entry_id = build_store_id_from_req("seal-autorecon", issuer, req.datasetA, req.datasetB) # TODO: change when the module is parametrised
+        datasetA = Dataset()
+        datasetA.json_unmarshall(req.dataset_a)
+        datasetB = Dataset()
+        datasetB.json_unmarshall(req.dataset_b)
+        entry_id = build_store_id_from_req("seal-autorecon", issuer, datasetA, datasetB) # TODO: change when the module is parametrised
         smh.deleteDatastoreEntry(entry_id)
     except SessionManagerError as err:
         return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
-                               "Error writing updated linkRequest to dataStore: " + str(err))
+                               "Error deleting linkRequest from dataStore: " + str(err))
 
     try:
         delete_request(request_id)
@@ -267,7 +271,24 @@ def linking_request_result(request_id):
         return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
                                "Request does not belong to the authenticated user")
 
+    datasetA = Dataset()
+    datasetA.json_unmarshall(req.dataset_a)
+    datasetB = Dataset()
+    datasetB.json_unmarshall(req.dataset_b)
+
     if req.status != "ACCEPTED":
+        # Delete request from dataStore
+        try:
+            entry_id = build_store_id_from_req("seal-autorecon", issuer, datasetA, datasetB) # TODO: change when the module is parametrised
+            smh.deleteDatastoreEntry(entry_id)
+        except SessionManagerError as err:
+            return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
+                                   "Error deleting linkRequest from dataStore: " + str(err))
+        try:
+            delete_request(request_id)
+        except RegisterNotFound:
+            logging.warning("This should not happen. Can't delete a register I have just read")
+
         # return "Linking request was not accepted", 403
         return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Linking request was not accepted")
 
@@ -278,11 +299,6 @@ def linking_request_result(request_id):
         expiration = expiration.isoformat()
 
     # Build Response object
-    datasetA = Dataset()
-    datasetA.json_unmarshall(req.dataset_a)
-    datasetB = Dataset()
-    datasetB.json_unmarshall(req.dataset_b)
-
     result = LinkRequest()
     result.id = req.request_id
     result.issuer = issuer
