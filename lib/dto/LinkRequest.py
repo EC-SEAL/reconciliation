@@ -5,6 +5,7 @@ from lib.dto.Dto import DTO
 class LinkRequest(DTO):
     def __init__(self):
         self.id = str
+        self.uri = str
         self.issuer = str
         self.type = str
         self.lloa = str

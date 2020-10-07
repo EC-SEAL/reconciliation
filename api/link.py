@@ -13,7 +13,8 @@ from definitions import DEFAULT_DATA_DIR
 from engine import app
 from lib.Microservice import session_manager_handler, redirect_return
 from lib.SMHandler import SessionManagerError
-from lib.Tools import load_json_file, build_store_id, indirect_search, build_store_id_from_req
+from lib.Tools import load_json_file, build_store_id, indirect_search, build_store_id_from_req, \
+    build_uri_representation_from_req
 from lib.dto.Dataset import Dataset
 from lib.dto.LinkRequest import LinkRequest
 from lib.dto.StatusResponse import StatusResponse, StatusCodes
@@ -310,6 +311,7 @@ def linking_request_result(request_id):
     result.datasetB = datasetB
     result.evidence = None
     result.conversation = None
+    result.uri = build_uri_representation_from_req(issuer, lloa, datasetA, datasetB)
 
     result_json = result.json_marshall()
     # TODO: sign the response json string

@@ -111,3 +111,41 @@ def indirect_search(key, dataSet):
             return attr.values[0]
     return None
 
+
+def build_uri_representation_from_req(LinkIssuerId, LLoA, datasetA, datasetB):
+    subjectA = indirect_search(datasetA.subjectId, datasetA)
+    issuerA = indirect_search(datasetA.issuerId, datasetA)
+    subjectB = indirect_search(datasetB.subjectId, datasetB)
+    issuerB = indirect_search(datasetB.issuerId, datasetB)
+    return build_uri_representation(LinkIssuerId, LLoA, subjectA, issuerA, subjectB, issuerB)
+
+
+def build_uri_representation(LinkIssuerId, LLoA, subjectA, issuerA, subjectB, issuerB):
+    if not LLoA:
+        raise Exception("No LLoA provided")
+    if not LinkIssuerId:
+        raise Exception("No link issuer ID provided")
+    if not subjectA:
+        raise Exception("No subject A id provided")
+    if not issuerA:
+        raise Exception("No issuer A id provided")
+    if not subjectB:
+        raise Exception("No subject B id provided")
+    if not issuerB:
+        raise Exception("No issuer B id provided")
+
+    LinkIssuerId = quote(LinkIssuerId)
+    LLoA = quote(LLoA)
+
+    identityA = f"{quote(subjectA)}:{quote(issuerA)}"
+    identityB = f"{quote(subjectB)}:{quote(issuerB)}"
+
+    # Id must be commutative for the two implied identities, we set them in alphabetic order
+    if identityA <= identityB:
+        firstIdentity = identityA
+        secondIdentity = identityB
+    else:
+        firstIdentity = identityB
+        secondIdentity = identityA
+
+    return f"urn:mace:project-seal.eu:link:{LinkIssuerId}:{LLoA}:{subjectA}:{issuerA}:{subjectB}:{issuerB}"
