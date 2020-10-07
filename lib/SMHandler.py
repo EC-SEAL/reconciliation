@@ -112,7 +112,7 @@ class SMHandler:
 
     # If name = NULL, get the whole session object
     def getSessionVar(self, name=None):
-        logging.debug('Requesting session variable (None means whole session object):' + name)
+        logging.debug('Requesting session variable (None means whole session object):' + (name or ''))
         queryParams = {'sessionId': self.sessId}
         if name is not None and isinstance(name, str):
             queryParams["variableName"] = name
@@ -344,9 +344,9 @@ class SMHandler:
             logging.debug('Searching all datastore entries')
         else:
             logging.debug('Searching datastore entries of type:' + type)
-        queryParams = {'sessionId': self.sessId,
-                       'type': type,
-                       }
+        queryParams = { 'sessionId': self.sessId }
+        if type:
+            queryParams['type'] = type
         url = self._getApiUrl('SM', 'datastoreSearch') + "?" + urlencode(queryParams)
 
         res = self.httpsig.get(url)

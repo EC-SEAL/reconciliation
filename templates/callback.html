@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Callback destination</title>
+</head>
+<body>
+    <a href="submit">Submit request</a>
+    {% if template.requestID %}
+        <a href="status/{{template.requestID}}">Request status</a>
+        <a href="cancel/{{template.requestID}}/{{template.sessionID}}">Cancel request</a>
+        <a href="response/{{template.requestID}}/{{template.sessionID}}">Get Response</a>
+    {% endif %}
+    <pre>
+Callback Token: {{ template.token }}
+Datastore:
+-------
+{{ template.datastore }}
+Session:
+-------
+{{ template.session }}
+
+Other data:
+----------
+{{ template.display }}
+    </pre>
+</body>
+</html>

@@ -25,12 +25,14 @@ def session_manager_handler(data_dir, ms_metadata_url,
 
 def redirect_return(sm_handler, url, status, origin, destination, message=""):
 
-    data = StatusResponse()
-    data.primaryCode = status
+    result = StatusResponse()
+    result.primaryCode = status
+    result.secondaryCode = ""
+    result.message = ""
     if message != "":
-        data.message = message
+        result.message = message
 
-    token = sm_handler.generateToken(origin, destination, data.json_marshall())
+    token = sm_handler.generateToken(origin, destination, result.json_marshall())
     print("Generated msToken: " + token + "<br/>\n")
 
     template = {

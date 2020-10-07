@@ -2,6 +2,9 @@
 # http://localhost:8050/test/client/status/28902ec5-8930-4d03-bea4-6347b6b0a793
 # http://localhost:8050/test/client/cancel/c625249b-a662-493d-8825-2626ad94d0ba
 # http://localhost:8050/test/client/response/aca89ce0-ac1a-4f58-985d-9c0aad49fc6a
+import base64
+import json
+import logging
 import os
 
 # TODO: update this script to:
@@ -13,7 +16,7 @@ import os
 # TODO: check if sameSite= None is being set
 
 
-from flask import render_template, Response
+from flask import render_template, Response, request
 
 from engine import app
 from config import config
@@ -32,7 +35,6 @@ key_file = config.get('HTTPSig', 'private_key')
 cm_url = config.get('CM', 'url')
 cm_url = os.getenv('MSMETADATAURL', cm_url)
 
-
 client_key_file = config.get('TestClient', 'cli_key')
 trusted_key = config.get('TestClient', 'trusted_key')
 fingerprnt = config.get('TestClient', 'fingerprint')
@@ -40,6 +42,9 @@ test_link_req = config.get('TestClient', 'test_link_req')
 
 test_auth_req = config.get('TestClient', 'test_auth_req')
 test_sp_metadata = config.get('TestClient', 'test_sp_metadata')
+
+cburl = "/test/client/callback"
+
 
 def httpsig_client():
     key = client_key_file
@@ -71,6 +76,72 @@ def get_url(mo, apiClass, apiCall):
 # API Endpoints
 
 
+# Callback address
+@app.route('/test/client/callback', methods=['GET', 'POST'])
+def test_client_callback():
+    token = ''
+    session = ''
+    output = ''
+    session_str = ''
+    sessid = ''
+    requestID = None
+    if request.form and request.form['msToken']:
+        token = request.form['msToken']
+
+        logging.debug("token: " + token)
+        token = token.split('.')
+        logging.debug("split token: " + str(token))
+
+        # Add padding to the B64 string
+        token[1] += "=" * ((4 - len(token[1]) % 4) % 4)
+        btoken = bytes(token[1], 'utf-8')
+        token = base64.b64decode(btoken)
+        json_token = json.loads(token)
+        token = json.dumps(json_token, indent=4)
+
+        jwt = json.loads(token)
+
+        sessid = jwt['sessionId']
+        smh = sm_handler()
+        smh.setSessID(sessid)
+
+        session = smh.getSessionVar()
+        session_str = ''
+        for sessvar in session:
+            value = session[sessvar]
+            if value[0] == '{':
+                valueunesc = value.replace('\\"', '"')
+                jsonvalue = json.loads(valueunesc)
+                session[sessvar] = jsonvalue
+                indentvalue = json.dumps(jsonvalue, indent=4)
+                session_str = session_str + sessvar + ': ' + indentvalue + '\n--------\n'
+            else:
+                session_str = session_str + sessvar + ': ' + value + '\n--------\n'
+
+        if session['linkRequest']:
+            linkRequest = session['linkRequest']
+            logging.debug("linkRequest: " + str(linkRequest))
+            if linkRequest['id']:
+                requestID = linkRequest['id']
+                logging.debug("linkRequest.id: " + str(requestID))
+
+        datastore = smh.searchDatastoreEntries()
+        datastore = json.dumps(datastore, indent=4)
+
+    template = {
+        'token': token,
+        'datastore': datastore,
+        'session': session_str,
+        'display': output,
+    }
+    if requestID:
+        template['requestID'] = requestID
+    if sessid:
+        template['sessionID'] = sessid
+    logging.debug("Template vars: " + str(template))
+    return render_template('callback.html', template=template)
+
+
 # Start a linking request
 @app.route('/test/client/submit', methods=['GET'])
 def test_client_submit_linking_request():
@@ -78,6 +149,8 @@ def test_client_submit_linking_request():
 
     smh.startSession()
     print("Started session: " + smh.sessId + "<br/>\n")
+
+    smh.writeSessionVar(cburl, 'ClientCallbackAddr')
 
     token = smh.generateToken("SAMLms_0001", "SAMLms_0001")
     print("Generated msToken: " + token + "<br/>\n")
@@ -106,13 +179,15 @@ def test_client_status_linking_request(request_id):
                     mimetype='application/json')
 
 
-@app.route('/test/client/cancel/<request_id>', methods=['GET'])
-def test_client_cancel_linking_request(request_id=None):
+@app.route('/test/client/cancel/<request_id>/<sess_id>', methods=['GET'])
+def test_client_cancel_linking_request(request_id, sess_id):
     smh = sm_handler()
 
-    # We don't care about the session, and no user is authenticated
-    smh.startSession()
-    print("Started session (a different one): " + smh.sessId + "<br/>\n")
+    ## We don't care about the session, and no user is authenticated
+    # smh.startSession()
+    # print("Started session (a different one): " + smh.sessId + "<br/>\n")
+
+    smh.setSessID(sess_id)
 
     token = smh.generateToken("SAMLms_0001", "SAMLms_0001")
     print("Generated msToken: " + token + "<br/>\n")
@@ -125,13 +200,15 @@ def test_client_cancel_linking_request(request_id=None):
     return render_template('msToken.html', template=template)
 
 
-@app.route('/test/client/response/<request_id>', methods=['GET'])
-def test_client_getresult_linking_request(request_id=None):
+@app.route('/test/client/response/<request_id>/<sess_id>', methods=['GET'])
+def test_client_getresult_linking_request(request_id, sess_id):
     smh = sm_handler()
 
-    # We don't care about the session, and no user is authenticated
-    smh.startSession()
-    print("Started session (a different one): " + smh.sessId + "<br/>\n")
+    ## We don't care about the session, and no user is authenticated
+    # smh.startSession()
+    # print("Started session (a different one): " + smh.sessId + "<br/>\n")
+
+    smh.setSessID(sess_id)
 
     token = smh.generateToken("SAMLms_0001", "SAMLms_0001")
     print("Generated msToken: " + token + "<br/>\n")
@@ -151,7 +228,6 @@ def test_client_getresult_linking_request(request_id=None):
 # http://localhost:8050/test/client/sp/eduGAIN/auth_request
 @app.route('/test/client/sp/<idp>/<type>', methods=['GET'])
 def test_client_submit_auth_request(idp, type):
-
     # Start session
     smh = sm_handler()
     smh.startSession()
