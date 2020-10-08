@@ -101,7 +101,7 @@ def build_store_id(module, linkIssuer, subjectA, issuerA, subjectB, issuerB):
         firstIdentity = identityB
         secondIdentity = identityA
 
-    return f"urn:mace:project-seal.eu:id:{module_id}:{linkIssuer_id}:{firstIdentity}:{secondIdentity}"
+    return f"urn:mace:project-seal.eu:id:link:{module_id}:{linkIssuer_id}:{firstIdentity}:{secondIdentity}"
 
 
 # Search the first value of a given attribute in the dataSet
@@ -148,4 +148,4 @@ def build_uri_representation(LinkIssuerId, LLoA, subjectA, issuerA, subjectB, is
         firstIdentity = identityB
         secondIdentity = identityA
 
-    return f"urn:mace:project-seal.eu:link:{LinkIssuerId}:{LLoA}:{subjectA}:{issuerA}:{subjectB}:{issuerB}"
+    return f"urn:mace:project-seal.eu:link:{LinkIssuerId}:{LLoA}:{firstIdentity}:{secondIdentity}"
