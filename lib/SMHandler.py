@@ -235,9 +235,14 @@ class SMHandler:
         # We assume the session exists before the dataStore is
         # created, but the call also supports creating a dataStore
         # which is independent from the session, by not passing a sessionID
-        queryParams = {'sessionId': self.sessId}
+        body = {
+            'sessionId': self.sessId,
+            'id': None,
+            'type': None,
+            'data': None,
+        }
 
-        res = self.httpsig.postForm(url, queryParams)
+        res = self.httpsig.postJson(url, body)
         res = self._parseResponse(res)
         logging.debug('resetDatastore Response: ' + str(res))
 
@@ -249,8 +254,6 @@ class SMHandler:
         self.sessId = res.sessionData.sessionId
 
         return self.sessId
-
-    # TODO: SEGUIR
 
     def addDatastoreEntry(self, id, type, data):
 
@@ -273,7 +276,7 @@ class SMHandler:
         url = self._getApiUrl('SM', 'datastoreAdd')
 
         logging.debug('Body sent:' + str(body))
-        res = self.httpsig.postForm(url, body)
+        res = self.httpsig.postJson(url, body)
         res = self._parseResponse(res)
         logging.debug('Received response:' + str(res))
 
@@ -287,30 +290,36 @@ class SMHandler:
         body = {
             'sessionId': self.sessId,
             'id': id,
+            'type': None,
+            'data': None,
         }
 
         url = self._getApiUrl('SM', 'datastoreDelete')
 
         logging.debug('Body sent:' + str(body))
-        res = self.httpsig.postForm(url, body)
+        res = self.httpsig.postJson(url, body)
         res = self._parseResponse(res)
         logging.debug('Received response:' + str(res))
 
-        if res.code == SessionMngrCode.ERROR:
+        if res.code == SessionMngrCode.ERROR or res.additionalData == SessionMngrCode.ERROR:
             raise SessionManagerError("storeEntry -" + id + "- delete failed: " + str(res.error))
 
     def getDatastoreEntry(self, id):
         logging.debug('Requesting datastore entry:' + id)
-        queryParams = {'sessionId': self.sessId,
-                       'id': id,
+        queryParams = {'sessionId': self.sessId}
+        body = {
+            'sessionId': self.sessId,
+            'id': id,
+            'type': None,
+            'data': None,
         }
         url = self._getApiUrl('SM', 'datastoreGet') + "?" + urlencode(queryParams)
 
-        res = self.httpsig.get(url)
+        res = self.httpsig.postJson(url, body)
         res = self._parseResponse(res)
         logging.debug('Received response:' + str(res))
 
-        if res.code != SessionMngrCode.OK:
+        if res.code != SessionMngrCode.OK or res.additionalData == SessionMngrCode.ERROR:
             raise SessionManagerError("store entry fetch failed: " + str(res.error))
 
         if not res.additionalData:
@@ -344,12 +353,16 @@ class SMHandler:
             logging.debug('Searching all datastore entries')
         else:
             logging.debug('Searching datastore entries of type:' + type)
-        queryParams = { 'sessionId': self.sessId }
-        if type:
-            queryParams['type'] = type
+        queryParams = {'sessionId': self.sessId}
+        body = {
+            'sessionId': self.sessId,
+            'id': None,
+            'type': type,
+            'data': None,
+        }
         url = self._getApiUrl('SM', 'datastoreSearch') + "?" + urlencode(queryParams)
 
-        res = self.httpsig.get(url)
+        res = self.httpsig.postJson(url, body)
         res = self._parseResponse(res)
         logging.debug('Received response:' + str(res))
 
@@ -359,11 +372,15 @@ class SMHandler:
         if not res.additionalData:
             raise SessionManagerError("No additionalData on response")
 
-        storeObjList = StoreEntryList()
-        storeObjList.json_unmarshall(res.additionalData)
+        storeObjListofDicts = json.loads(res.additionalData)
+        storeObjList = []
+        for storeObjDict in storeObjListofDicts:
+            storeObj = StoreEntry()
+            storeObj.unmarshall(storeObjDict)
+            storeObjList.append(storeObj)
 
         idx = 0
-        for storeObj in storeObjList.entries:
+        for storeObj in storeObjList:
             if not storeObj.id:
                 raise SessionManagerError("store entry search failed: no data id at idx " + str(idx))
             if not storeObj.type:

@@ -156,7 +156,12 @@ class HttpSigClient:
         prepared = raw.prepare()
         self.pretty_print_post(prepared)
         s = requests.Session()
-        res = s.send(prepared)
+        # Added proxy support for debug mode # TODO: parametrise
+        proxies = {
+            'http': 'http://localhost:8080',
+            'https': 'http://localhost:8080',
+        }
+        res = s.send(prepared, proxies=proxies)
         s.close()
         return res
 

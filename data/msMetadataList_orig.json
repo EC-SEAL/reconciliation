@@ -120,73 +120,73 @@
         "apiClass": "SM",
         "apiCall": "endSession",
         "apiConnectionType": "post",
-        "apiEndpoint": "http://vm.project-seal.eu:9090/sm/endSession"
+        "apiEndpoint": "http://esmoGateway:8090/sm/endSession"
       },
       {
         "apiClass": "SM",
         "apiCall": "generateToken",
         "apiConnectionType": "get",
-        "apiEndpoint": "http://vm.project-seal.eu:9090/sm/generateToken"
+        "apiEndpoint": "http://esmoGateway:8090/sm/generateToken"
       },
       {
         "apiClass": "SM",
         "apiCall": "getSession",
         "apiConnectionType": "get",
-        "apiEndpoint": "http://vm.project-seal.eu:9090/sm/getSession"
+        "apiEndpoint": "http://esmoGateway:8090/sm/getSession"
       },
       {
         "apiClass": "SM",
         "apiCall": "getSessionData",
         "apiConnectionType": "get",
-        "apiEndpoint": "http://vm.project-seal.eu:9090/sm/getSessionData"
+        "apiEndpoint": "http://esmoGateway:8090/sm/getSessionData"
       },
       {
         "apiClass": "SM",
         "apiCall": "startSession",
         "apiConnectionType": "post",
-        "apiEndpoint": "http://vm.project-seal.eu:9090/sm/startSession"
+        "apiEndpoint": "http://esmoGateway:8090/sm/startSession"
       },
       {
         "apiClass": "SM",
         "apiCall": "updateSessionData",
         "apiConnectionType": "post",
-        "apiEndpoint": "http://vm.project-seal.eu:9090/sm/updateSessionData"
+        "apiEndpoint": "http://esmoGateway:8090/sm/updateSessionData"
       },
       {
         "apiClass": "SM",
         "apiCall": "validateToken",
         "apiConnectionType": "get",
-        "apiEndpoint": "http://vm.project-seal.eu:9090/sm/validateToken"
+        "apiEndpoint": "http://esmoGateway:8090/sm/validateToken"
       },
       {
         "apiClass": "SM",
         "apiCall": "datastoreStart",
         "apiConnectionType": "get",
-        "apiEndpoint": "http://vm.project-seal.eu:9090/sm/new/startSession"
+        "apiEndpoint": "http://esmoGateway:8090/sm/new/startSession"
       },
       {
         "apiClass": "SM",
         "apiCall": "datastoreAdd",
         "apiConnectionType": "post",
-        "apiEndpoint": "http://vm.project-seal.eu:9090/sm/new/add"
+        "apiEndpoint": "http://esmoGateway:8090/sm/new/add"
       },
       {
         "apiClass": "SM",
         "apiCall": "datastoreDelete",
         "apiConnectionType": "get",
-        "apiEndpoint": "http://vm.project-seal.eu:9090/sm/new/delete"
+        "apiEndpoint": "http://esmoGateway:8090/sm/new/delete"
       },
       {
         "apiClass": "SM",
         "apiCall": "datastoreGet",
         "apiConnectionType": "get",
-        "apiEndpoint": "http://vm.project-seal.eu:9090/sm/new/get"
+        "apiEndpoint": "http://esmoGateway:8090/sm/new/get"
       },
       {
         "apiClass": "SM",
         "apiCall": "datastoreSearch",
         "apiConnectionType": "get",
-        "apiEndpoint": "http://vm.project-seal.eu:9090/sm/new/search"
+        "apiEndpoint": "http://esmoGateway:8090/sm/new/search"
       }
     ]
   },
