@@ -77,6 +77,7 @@ def get_url(mo, apiClass, apiCall):
 
 
 # Callback address
+@app.route('/test/client/', methods=['GET', 'POST'])
 @app.route('/test/client/callback', methods=['GET', 'POST'])
 def test_client_callback():
     token = ''
@@ -84,6 +85,7 @@ def test_client_callback():
     output = ''
     session_str = ''
     sessid = ''
+    datastoreStr = ''
     requestID = None
     if request.form and request.form['msToken']:
         token = request.form['msToken']
@@ -126,11 +128,12 @@ def test_client_callback():
                 logging.debug("linkRequest.id: " + str(requestID))
 
         datastore = smh.searchDatastoreEntries()
-        datastore = json.dumps(datastore, indent=4)
+        for entry in datastore:
+            datastoreStr = json.dumps(entry.marshall(), indent=4)
 
     template = {
         'token': token,
-        'datastore': datastore,
+        'datastore': datastoreStr,
         'session': session_str,
         'display': output,
     }

@@ -5,11 +5,12 @@
     <title>Callback destination</title>
 </head>
 <body>
-    <a href="submit">Submit request</a>
+    <a href="">Reset</a>
+     | <a href="submit">Submit request</a>
     {% if template.requestID %}
-        <a href="status/{{template.requestID}}">Request status</a>
-        <a href="cancel/{{template.requestID}}/{{template.sessionID}}">Cancel request</a>
-        <a href="response/{{template.requestID}}/{{template.sessionID}}">Get Response</a>
+         | <a href="status/{{template.requestID}}">Request status</a>
+         | <a href="cancel/{{template.requestID}}/{{template.sessionID}}">Cancel request</a>
+         | <a href="response/{{template.requestID}}/{{template.sessionID}}">Get Response</a>
     {% endif %}
     <pre>
 Callback Token: {{ template.token }}
