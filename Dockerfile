@@ -6,7 +6,7 @@ FROM python:latest
 MAINTAINER Universitat Jaume I
 LABEL Author="Francisco Aragó"
 LABEL E-mail="farago@uji.es"
-LABEL version="0.0.1c"
+LABEL version="0.0.1d"
 
 ENV PROPERTIES_FILE "server.properties"
 ENV ENCRYPTION_KEY "sessiondatabasenecryptionkey"
