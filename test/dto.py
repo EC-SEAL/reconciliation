@@ -198,6 +198,14 @@ class DtoTest(unittest.TestCase):
         d.unmarshall(datasets[0])
         d.json_marshall()
 
+    def test_unmarshall_marshall_null_field(self):
+        lreq = load_json_file('data/testLinkRequestWithNulls.json')
+        d = LinkRequest()
+        d.unmarshall(lreq)
+        print(d)
+        d.json_marshall()
+        print(d.json_marshall())
+
 
 if __name__ == '__main__':
     unittest.main()

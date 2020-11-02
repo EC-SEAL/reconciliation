@@ -26,6 +26,9 @@ class DTO:
                     self.__dict__[attr] = arr
                 else:
                     self.__dict__[attr] = self.unmarshall_item(attr, val, self.__dict__[attr])
+            else:
+                self.__dict__[attr] = None
+
         return self
 
     def unmarshall_item(self, attr, val, cls):
