@@ -9,7 +9,7 @@
         "issuer": null,
         "categories": [],
         "attributes": [
-          "$CurrentGivenName",
+          "$GivenName",
           " ",
           "$FamilyName"
         ],
@@ -23,7 +23,7 @@
         "attributes": [
           "$givenName",
           " ",
-          "$surname"
+          "$sn"
         ],
         "regexp": null,
         "replace": null

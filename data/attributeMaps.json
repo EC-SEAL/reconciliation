@@ -23,7 +23,7 @@
         "attributes": [
           "$givenName",
           " ",
-          "$surname"
+          "$sn"
         ],
         "regexp": null,
         "replace": null

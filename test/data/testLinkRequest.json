@@ -116,7 +116,7 @@
         ]
       },
       {
-        "name": "surname",
+        "name": "sn",
         "friendlyName": null,
         "encoding": "plain",
         "language": null,
