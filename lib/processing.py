@@ -20,6 +20,7 @@ from lib.processors.base.Processors import Processors
 from lib.dto.Dataset import Dataset, Attribute
 from lib.dto.AttributeMap import AttributeMap
 from lib.dto.CompareTuple import CompareTuple
+from lib.processors.base.processor import Processor
 
 
 class Processing:
@@ -39,51 +40,44 @@ class Processing:
         compare_tuples = []
         for transform in transforms:
 
+            # If no processor is defined, we default to string
+            proc_type = transform.processor
+            if proc_type not in self.processors.list():
+                proc_type = "str"
+            processor = self.processors.get(proc_type)
+
+            # Check if both datasets (of a type, issuer and categories)
+            # have at least one matching rule on the map
+            pairings_a = self.match_set(set_a, transform)
+            pairings_b = self.match_set(set_b, transform)
+            if len(pairings_a) == 0 or len(pairings_b) == 0:
+                continue
+
+            # Process each set with one of the matching pairings to generate a compare string candidate
+            tuple_candidates_a = set()
+            tuple_candidates_b = set()
+            for pair in pairings_a:
+                compare_string = self.process(set_a, pair, processor)
+                if compare_string:
+                    tuple_candidates_a.add(compare_string)
+            for pair in pairings_b:
+                compare_string = self.process(set_b, pair, processor)
+                if compare_string:
+                    tuple_candidates_b.add(compare_string)
+
+            # As potentially multiple compare strings may have generated from equivalent
+            # rules, choose the one that will provide a stronger match
+            tuple_member_a = self.best_candidate(tuple_candidates_a, processor)
+            tuple_member_b = self.best_candidate(tuple_candidates_b, processor)
+
+            # Build the tuple
             compare_tuple = CompareTuple()
             compare_tuple.weight = transform.weight
-            for pair in transform.pairings:
-                # Get dataset of a type, issuer and categories
-                try:
-                    st = self.match_set(pair.profile,
-                                        pair.issuer,
-                                        pair.categories,
-                                        set_a, set_b)
-                except MapDatasetMatchNotFound:
-                    # If pairing does not match this case, we fail silently and go on
-                    continue
+            compare_tuple.items.append(tuple_member_a)
+            compare_tuple.items.append(tuple_member_b)
 
-                # Substitute placeholders for attributes and Concatenate.
-                # (if attr not found, fail silently and leave empty string)
-                final_str = self.substitute(pair.attributes, st)
-
-                # Match and replace if required
-                if pair.regexp is not None \
-                        and pair.replace is not None:
-                    final_str = re.sub(pair.regexp, pair.replace, final_str)
-
-                # If no processor is defined, we default to string
-                proc_type = transform.processor
-                if proc_type not in self.processors.list():
-                    proc_type = "str"
-                processor = self.processors.get(proc_type)
-
-                # Process input data according to data type
-                final_str = processor.process(final_str)
-
-                # Add the resulting object to the tuple
-                compare_tuple.items.append(final_str)
-
-            # If something weird happened, sanitize, log warning and go on
-            if len(compare_tuple.items) > 2:
-                logging.warning("A tuple had more than 2 elements. Maps are not precise enough")
-                print(compare_tuple)
-                compare_tuple.items = [compare_tuple.items[0], compare_tuple.items[1]]
-
-            # Avoid two-empty string comparisons
-            if compare_tuple.items[0] != "" or compare_tuple.items[1] != "":
-                compare_tuples.append(compare_tuple)
-            else:
-                logging.warning("Both elements in a tuple were empty strings. Maps are not precise enough")
+            # Add it to the compare set
+            compare_tuples.append(compare_tuple)
 
         return compare_tuples
 
@@ -130,36 +124,83 @@ class Processing:
                 return attr.values[0]
         return None
 
-    # Will return which of the datasets matches the criteria, or launch an exception otherwise
-    def match_set(self, profile, issuer, categories, set_a, set_b):
-        sets = [set_a, set_b]
-        found = False
-        for st in sets:
-            # If type does not match, skip
-            if st.type != profile:
+    # For all the pairings in a map, will return those that fit the dataset
+    def match_set(self, dataset: Dataset(), attr_map: AttributeMap()):
+
+        # Get the issuer of the data set
+        set_issuer = None
+        if dataset.issuerId is not None and dataset.issuerId != '':
+            iss = None
+            for attr in dataset.attributes:
+                if attr.name == dataset.issuerId:
+                    iss = attr.values[0]
+                    break
+            if iss is not None and iss != '':
+                set_issuer = iss
+
+        # Check all pairings to see if they are valid for this dataset
+        valid_pairings = set()
+        for pair in attr_map.pairings:
+
+            # If there is a fixed issuer in the pairing, check it
+            if pair.issuer is not None and set_issuer is not None:
+                if pair.issuer == set_issuer:
+                    valid_pairings.add(pair)
                 continue
-            # If there is a fixed issuer
-            if issuer is not None:
-                if st.issuerId is None or st.issuerId == "":
-                    continue
-                if st.issuerId not in st.attributes:
-                    continue
-                if st.attributes[st.issuerId] != profile:
-                    continue
-            found = True
+
+            # If there's type and does not match, skip
+            if dataset.type is not None and pair.profile is not None:
+                if dataset.type == pair.profile:
+                    valid_pairings.add(pair)
+                continue
+
             # If there are fixed categories to find (one found is ok)
-            if categories is not None and categories != []:
-                found = False
-                for cat in categories:
-                    if cat in st.categories:
-                        found = True
+            if pair.categories is not None and pair.categories != []:
+                for cat in pair.categories:
+                    if cat in dataset.categories:
+                        valid_pairings.add(pair)
                         break
-            if found:
-                return st
-        if not found:
-            raise MapDatasetMatchNotFound("Passed datasets do not fulfill the criteria")
+
+        return valid_pairings
+
+    # Generate a compare string from an attribute set and a pairing rule
+    def process(self, attr_set, pair, processor):
+
+        # Substitute placeholders for attributes and Concatenate.
+        # (if attr not found, fail silently and leave empty string)
+        final_str = self.substitute(pair.attributes, attr_set)
+
+        # Match and replace if required
+        if pair.regexp is not None \
+                and pair.replace is not None:
+            final_str = re.sub(pair.regexp, pair.replace, final_str)
+
+        # Process input data according to data type
+        final_str = processor.process(final_str)
+
+        return final_str
+
+    def best_candidate(self, tuple_candidates, processor: Processor()):
+        best = None
+        for candidate in tuple_candidates:
+            if best is None:
+                # First item, automatic best
+                best = candidate
+                continue
+            # Compare with last
+            best = processor.best(best, candidate)
+
+        if best is None:
+            raise NoTupleCandidates("The candidates set for a compare string in a tuple is empty")
+
+        return best
 
 
 class MapDatasetMatchNotFound(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
+class NoTupleCandidates(Exception):
     def __init__(self, message):
         self.message = message

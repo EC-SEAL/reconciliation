@@ -5,7 +5,7 @@ import unittest
 
 from lib import Tools
 from lib.Tools import load_json_file
-from lib.dto.AttributeMap import AttributeMap
+from lib.dto.AttributeMap import AttributeMap, Pairing
 from lib.dto.Dataset import Dataset
 from lib.processing import Processing, MapDatasetMatchNotFound
 from lib.processors.StringProcessor import StringProcessor
@@ -49,14 +49,16 @@ class ProcessorTest(unittest.TestCase):
         self.assertEqual(expected_string, output_string)
 
     def test_no_match_set(self):
-        profile = "fail"
-        issuer = "fail"
-        categories = ["None", "to", "be", "found"]
+        tr = AttributeMap()
+        pr = Pairing()
+        pr.profile = "fail"
+        pr.issuer = "fail"
+        pr.categories = ["None", "to", "be", "found"]
+        tr.pairings = [pr]
         p = Processing()
-        with self.assertRaises(MapDatasetMatchNotFound):
-            p.match_set(profile, issuer, categories,
-                        self.datasets[0],
-                        self.datasets[1])
+        # with self.assertRaises(MapDatasetMatchNotFound):
+        pairings = p.match_set(self.datasets[0], tr)
+        self.assertEquals(pairings, set())
 
     def test_no_getAttributeValue(self):
         attr_name = "fail"
@@ -66,7 +68,7 @@ class ProcessorTest(unittest.TestCase):
         self.assertIsNone(value)
 
     def test_substitution(self):
-        attributes = ["$CurrentGivenName", " ", "$FamilyName"]
+        attributes = ["$GivenName", " ", "$FamilyName"]
         expected_str = "FRANCISCO JOSE ARAGO MONZONIS"
         p = Processing()
         final_str = p.substitute(attributes, self.datasets[0])
@@ -139,6 +141,14 @@ class ProcessorTest(unittest.TestCase):
         processor = processors.get("NumberProcessor")
         final_str = processor.process(input_str)
         self.assertEqual(final_str, expected_str)
+
+    def test_transform_best_str(self):
+        str1 = "short string"
+        str2 = "this is a longer string"
+        processors = Processors()
+        processor = processors.get("StringProcessor")
+        best = processor.best(str1, str2)
+        self.assertEqual(best, str2)
 
 
 if __name__ == '__main__':

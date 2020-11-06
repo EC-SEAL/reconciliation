@@ -3,6 +3,10 @@
 import unittest
 import logging
 
+from lib.Tools import load_json_file
+from lib.dto.LinkRequest import LinkRequest
+from lib.reconciliation import Reconciliation
+
 
 class LinkTest(unittest.TestCase):
 
@@ -14,4 +18,43 @@ class LinkTest(unittest.TestCase):
         pass
 
     def test_1(self):
-        pass
+        maps = load_json_file('data/attributeMaps.json', encoding='utf8')
+        reqj = load_json_file('data/testLinkRequest.json', encoding='utf8')
+
+        lreq = LinkRequest()
+        lreq.unmarshall(reqj)
+
+        r = Reconciliation()
+        r.set_mappings(maps)
+        sim = r.similarity(lreq.datasetA, lreq.datasetB)
+        print(reqj)
+        print(sim)
+        self.assertEqual(sim, 1.0)
+
+    def test_2(self):
+        maps = load_json_file('data/attributeMaps.json', encoding='utf8')
+        reqj = load_json_file('data/testLinkRequest2.json', encoding='utf8')
+
+        lreq = LinkRequest()
+        lreq.unmarshall(reqj)
+
+        r = Reconciliation()
+        r.set_mappings(maps)
+        sim = r.similarity(lreq.datasetA, lreq.datasetB)
+        print(reqj)
+        print(sim)
+        self.assertEqual(sim, 1.0)
+
+    def test_3(self):
+        maps = load_json_file('data/attributeMaps.json', encoding='utf8')
+        reqj = load_json_file('data/testLinkRequest3.json', encoding='utf8')
+
+        lreq = LinkRequest()
+        lreq.unmarshall(reqj)
+
+        r = Reconciliation()
+        r.set_mappings(maps)
+        sim = r.similarity(lreq.datasetA, lreq.datasetB)
+        print(reqj)
+        print(sim)
+        self.assertEqual(sim, 1.0)

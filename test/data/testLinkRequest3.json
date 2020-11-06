@@ -1,0 +1,143 @@
+{
+  "id": null,
+  "uri": null,
+  "issuer" : null,
+  "lloa" : null,
+  "type" : null,
+  "issued" : null,
+  "expiration" : null,
+  "evidence" : null,
+  "conversation" : null,
+
+  "datasetA" : {
+    "id": "6c0f70a8-f32b-4535-b5f6-0d596c52813a",
+    "type": "eIDAS",
+    "categories": [],
+    "issuerId": "Issuer",
+    "subjectId": "PersonIdentifier",
+    "loa": "4",
+    "issued": "2018-12-06T19:40:16Z",
+    "expiration": "2018-15-06T19:45:16Z",
+    "attributes": [
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName",
+        "friendlyName": "GivenName",
+        "encoding": "plain",
+        "language": null,
+        "mandatory": true,
+        "values": [
+          "ΧΡΙΣΤΙΝΑ CHRISTINA"
+        ]
+      },
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName",
+        "friendlyName": "FamilyName",
+        "encoding": "plain",
+        "language": null,
+        "mandatory": true,
+        "values": [
+          "ΠΑΛΙΟΚΩΣΤΑ PALIOKOSTA"
+        ]
+      },
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier",
+        "friendlyName": "PersonIdentifier",
+        "encoding": "plain",
+        "language": null,
+        "mandatory": true,
+        "values": [
+          "GR/GR/ERMIS-58333947"
+        ]
+      },
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/DateOfBirth",
+        "friendlyName": "DateOfBirth",
+        "encoding": "plain",
+        "language": null,
+        "mandatory": true,
+        "values": [
+          "1980-01-01"
+        ]
+      },
+      {
+        "name": "Issuer",
+        "friendlyName": "Issuer",
+        "encoding": "plain",
+        "language": null,
+        "mandatory": true,
+        "values": [
+          "https://eidas.redsara.es/EidasNode/ServiceMetadata"
+        ]
+      }
+    ],
+    "properties": {
+      "test": "test value"
+    }
+  },
+
+  "datasetB" : {
+    "id": "6c0f70a8-f32b-4535-b5f6-0d596c52813a",
+    "type": "eIDAS",
+    "categories": [],
+    "issuerId": "Issuer",
+    "subjectId": "PersonIdentifier",
+    "loa": "4",
+    "issued": "2018-12-06T19:40:16Z",
+    "expiration": "2018-15-06T19:45:16Z",
+    "attributes": [
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName",
+        "friendlyName": "GivenName",
+        "encoding": "plain",
+        "language": null,
+        "mandatory": true,
+        "values": [
+          "ΧΡΙΣΤΙΝΑ CHRISTINA"
+        ]
+      },
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName",
+        "friendlyName": "FamilyName",
+        "encoding": "plain",
+        "language": null,
+        "mandatory": true,
+        "values": [
+          "ΠΑΛΙΟΚΩΣΤΑ PALIOKOSTA"
+        ]
+      },
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier",
+        "friendlyName": "PersonIdentifier",
+        "encoding": "plain",
+        "language": null,
+        "mandatory": true,
+        "values": [
+          "GR/GR/ERMIS-58333947"
+        ]
+      },
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/DateOfBirth",
+        "friendlyName": "DateOfBirth",
+        "encoding": "plain",
+        "language": null,
+        "mandatory": true,
+        "values": [
+          "1980-01-01"
+        ]
+      },
+      {
+        "name": "Issuer",
+        "friendlyName": "Issuer",
+        "encoding": "plain",
+        "language": null,
+        "mandatory": true,
+        "values": [
+          "https://eidas.redsara.es/EidasNode/ServiceMetadata"
+        ]
+      }
+    ],
+    "properties": {
+      "test": "test value"
+    }
+  }
+}

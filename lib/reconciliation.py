@@ -59,14 +59,19 @@ class Reconciliation:
             tuple_max_lengths.add(ctuple.max_length)
 
         # Maximum length of all tuples
-        tuples_max = max(tuple_max_lengths)
+        # tuples_max = max(tuple_max_lengths)
+
+        # Sum of lengths of all tuples max
+        sum_lengths = 0
+        for ctuple in compare_tuples:
+            sum_lengths = sum_lengths + ctuple.max_length
 
         # Calculate normalised weight
         for ctuple in compare_tuples:
+            ctuple.length_weight = 1.0
             if use_length_weight:
-                ctuple.length_weight = ctuple.max_length / tuples_max
-            else:
-                ctuple.length_weight = 1.0
+                # ctuple.length_weight = ctuple.max_length / tuples_max
+                ctuple.length_weight = ctuple.max_length / sum_lengths
 
         # Calculate normalised-weighted similarity for each tuple
         similarities = []
@@ -75,8 +80,12 @@ class Reconciliation:
                                 * ctuple.weight
                                 * ctuple.length_weight)
 
-        # Calculate Dataset Similarity Coefficient
-        sim = functools.reduce(lambda a, b: a + b, similarities) / len(similarities)
+        # Calculate Dataset Similarity Coefficient (if not using length_weight,
+        # because length_weight is already normalised)
+        if use_length_weight:
+            sim = functools.reduce(lambda a, b: a + b, similarities)
+        else:
+            sim = functools.reduce(lambda a, b: a + b, similarities) / len(similarities)
 
         return sim
 

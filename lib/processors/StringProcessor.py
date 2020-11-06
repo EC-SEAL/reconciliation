@@ -22,3 +22,8 @@ class StringProcessor(Processor):
         # Uppercase the string
         final_str = final_str.upper()
         return final_str
+
+    def best(self, item_a, item_b):
+        if len(item_a) >= len(item_b):
+            return item_a
+        return item_b

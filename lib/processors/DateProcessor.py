@@ -36,3 +36,13 @@ class DateProcessor(Processor):
             final_str = input_string
 
         return final_str
+
+    def best(self, item_a, item_b):
+
+        date_a = dateparser.parse(item_a)
+        date_b = dateparser.parse(item_b)
+        if date_a is None or date_b is None:
+            raise TypeError
+
+        # They are two dates. There is no best. Either it parsed or not
+        return item_a

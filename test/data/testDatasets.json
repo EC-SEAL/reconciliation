@@ -11,7 +11,7 @@
     "attributes": [
       {
         "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName",
-        "friendlyName": "CurrentGivenName",
+        "friendlyName": "GivenName",
         "encoding": "plain",
         "language": null,
         "mandatory": true,
@@ -105,7 +105,7 @@
         ]
       },
       {
-        "name": "surname",
+        "name": "sn",
         "friendlyName": null,
         "encoding": "plain",
         "language": null,
@@ -160,7 +160,7 @@
     "attributes": [
       {
         "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName",
-        "friendlyName": "CurrentGivenName",
+        "friendlyName": "GivenName",
         "encoding": "plain",
         "language": null,
         "mandatory": true,
@@ -254,7 +254,7 @@
         ]
       },
       {
-        "name": "surname",
+        "name": "sn",
         "friendlyName": null,
         "encoding": "plain",
         "language": null,

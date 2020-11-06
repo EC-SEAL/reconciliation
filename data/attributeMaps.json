@@ -27,6 +27,52 @@
         ],
         "regexp": null,
         "replace": null
+      },
+      {
+        "profile": "eduGAIN",
+        "issuer": null,
+        "categories": [],
+        "attributes": [
+          "$displayName"
+        ],
+        "regexp": null,
+        "replace": null
+      }
+    ]
+  },
+   {
+    "description": "eIDAS principal name mapping",
+    "weight": 1.0,
+    "processor": "StringProcessor",
+    "pairings": [
+      {
+        "profile": "eIDAS",
+        "issuer": null,
+        "categories": [],
+        "attributes": [
+          "$GivenName",
+          " ",
+          "$FamilyName"
+        ],
+        "regexp": null,
+        "replace": null
+      }
+    ]
+  },
+  {
+    "description": "eIDAS birth date mapping",
+    "weight": 1.0,
+    "processor": "DateProcessor",
+    "pairings": [
+      {
+        "profile": "eIDAS",
+        "issuer": null,
+        "categories": [],
+        "attributes": [
+          "$DateOfBirth"
+        ],
+        "regexp": null,
+        "replace": null
       }
     ]
   }

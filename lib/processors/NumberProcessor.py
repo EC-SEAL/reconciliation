@@ -31,3 +31,8 @@ class NumberProcessor(Processor):
             final_str = input_string
 
         return final_str
+
+    def best(self, item_a, item_b):
+        if item_a >= item_b:
+            return item_a
+        return item_b
