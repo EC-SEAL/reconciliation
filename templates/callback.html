@@ -8,7 +8,7 @@
     <a href="">Reset</a>
      | <a href="submit">Submit request</a>
     {% if template.requestID %}
-         | <a href="status/{{template.requestID}}">Request status</a>
+         | <a href="/link/{{template.requestID}}/status">Request status</a>
          | <a href="cancel/{{template.requestID}}/{{template.sessionID}}">Cancel request</a>
          | <a href="response/{{template.requestID}}/{{template.sessionID}}">Get Response</a>
     {% endif %}

@@ -14,8 +14,7 @@ import os
 #   - display the likRequest, etc, by reading the variables from the SM.
 
 # TODO: check if sameSite= None is being set
-
-
+import flask
 from flask import render_template, Response, request
 
 from engine import app
@@ -176,7 +175,9 @@ def test_client_submit_linking_request():
 @app.route('/test/client/status/<request_id>', methods=['GET'])
 def test_client_status_linking_request(request_id):
     cli = httpsig_client()
-    resp = cli.get(f'http://localhost:{port}/link/{request_id}/status')
+    thishost = flask.request.host
+    thisscheme = flask.request.scheme
+    resp = cli.get(f'{thisscheme}://{thishost}/link/{request_id}/status')
     return Response(resp.text,
                     status=200,
                     mimetype='application/json')
