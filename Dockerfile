@@ -6,7 +6,7 @@ FROM python:latest
 MAINTAINER Universitat Jaume I
 LABEL Author="Francisco Aragó"
 LABEL E-mail="farago@uji.es"
-LABEL version="0.0.1d"
+LABEL version="0.0.1e"
 
 ENV PROPERTIES_FILE "server.properties"
 ENV ENCRYPTION_KEY "sessiondatabasenecryptionkey"
@@ -41,7 +41,7 @@ EXPOSE $MSPORT
 # Production
 
 # To run with SSL
-CMD gunicorn -w 4 -b 0.0.0.0:8050 --certfile=ssl_cert.pem --keyfile=ssl_cert.key app:app
+CMD gunicorn -w 4 -b 0.0.0.0:8050 --certfile=/app/data/ssl_cert.pem --keyfile=/app/data/ssl_cert.key app:app
 
 # To run without SSL
 #CMD gunicorn -w $WTHREADS -b 0.0.0.0:$MSPORT app:app
