@@ -63,7 +63,9 @@ def get_swagger_spec(spec_filepath):
 
 #  seal_yaml = get_swagger_spec("swagger/seal_ms_reconciliation.yaml")
 #
-
+class StoreIDBuildError(BaseException):
+    def __init__(self, message):
+        self.message = message
 
 def build_store_id_from_req(module, issuer, datasetA, datasetB):
     subjectA = indirect_search(datasetA.subjectId, datasetA)
@@ -75,17 +77,17 @@ def build_store_id_from_req(module, issuer, datasetA, datasetB):
 
 def build_store_id(module, linkIssuer, subjectA, issuerA, subjectB, issuerB):
     if not module:
-        raise Exception("No module name provided")
+        raise StoreIDBuildError("No module name provided")
     if not linkIssuer:
-        raise Exception("No link issuer name provided")
+        raise StoreIDBuildError("No link issuer name provided")
     if not subjectA:
-        raise Exception("No subject A id provided")
+        raise StoreIDBuildError("No subject A id provided")
     if not issuerA:
-        raise Exception("No issuer A id provided")
+        raise StoreIDBuildError("No issuer A id provided")
     if not subjectB:
-        raise Exception("No subject B id provided")
+        raise StoreIDBuildError("No subject B id provided")
     if not issuerB:
-        raise Exception("No issuer B id provided")
+        raise StoreIDBuildError("No issuer B id provided")
 
     module_id = quote(module)
     linkIssuer_id = quote(linkIssuer)
@@ -112,6 +114,10 @@ def indirect_search(key, dataSet):
     return None
 
 
+class LinkURIBuildError(BaseException):
+    def __init__(self, message):
+        self.message = message
+
 def build_uri_representation_from_req(LinkIssuerId, LLoA, datasetA, datasetB):
     subjectA = indirect_search(datasetA.subjectId, datasetA)
     issuerA = indirect_search(datasetA.issuerId, datasetA)
@@ -122,17 +128,17 @@ def build_uri_representation_from_req(LinkIssuerId, LLoA, datasetA, datasetB):
 
 def build_uri_representation(LinkIssuerId, LLoA, subjectA, issuerA, subjectB, issuerB):
     if not LLoA:
-        raise Exception("No LLoA provided")
+        raise LinkURIBuildError("No LLoA provided")
     if not LinkIssuerId:
-        raise Exception("No link issuer ID provided")
+        raise LinkURIBuildError("No link issuer ID provided")
     if not subjectA:
-        raise Exception("No subject A id provided")
+        raise LinkURIBuildError("No subject A id provided")
     if not issuerA:
-        raise Exception("No issuer A id provided")
+        raise LinkURIBuildError("No issuer A id provided")
     if not subjectB:
-        raise Exception("No subject B id provided")
+        raise LinkURIBuildError("No subject B id provided")
     if not issuerB:
-        raise Exception("No issuer B id provided")
+        raise LinkURIBuildError("No issuer B id provided")
 
     LinkIssuerId = quote(LinkIssuerId)
     LLoA = quote(LLoA)

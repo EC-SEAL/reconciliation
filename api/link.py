@@ -2,7 +2,6 @@
 # -*- coding: UTF-8 -*-
 import os
 import uuid
-from urllib.parse import urlencode
 
 from flask import Response, request
 from datetime import datetime, timedelta
@@ -13,8 +12,8 @@ from definitions import DEFAULT_DATA_DIR
 from engine import app
 from lib.Microservice import session_manager_handler, redirect_return
 from lib.SMHandler import SessionManagerError
-from lib.Tools import load_json_file, build_store_id, indirect_search, build_store_id_from_req, \
-    build_uri_representation_from_req
+from lib.Tools import load_json_file, build_store_id_from_req, \
+    build_uri_representation_from_req, StoreIDBuildError, LinkURIBuildError
 from lib.dto.Dataset import Dataset
 from lib.dto.LinkRequest import LinkRequest
 from lib.dto.StatusResponse import StatusResponse, StatusCodes
@@ -145,6 +144,9 @@ def submit_linking_request():
     except SessionManagerError as err:
         return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
                                "Error writing updated linkRequest to dataStore: " + str(err))
+    except StoreIDBuildError as err:
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
+                               "Error building store ID: " + str(err))
 
     # We also overwrite it in SM session
     try:
@@ -232,7 +234,9 @@ def cancel_linking_request(request_id):
     except SessionManagerError as err:
         return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
                                "Error deleting linkRequest from dataStore: " + str(err))
-
+    except StoreIDBuildError as err:
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
+                               "Error building store ID: " + str(err))
     try:
         delete_request(request_id)
         # return "Request Deleted", 200
@@ -285,6 +289,9 @@ def linking_request_result(request_id):
         except SessionManagerError as err:
             return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
                                    "Error deleting linkRequest from dataStore: " + str(err))
+        except StoreIDBuildError as err:
+            return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
+                                   "Error building store ID: " + str(err))
         try:
             delete_request(request_id)
         except RegisterNotFound:
@@ -311,7 +318,12 @@ def linking_request_result(request_id):
     result.datasetB = datasetB
     result.evidence = None
     result.conversation = None
-    result.uri = build_uri_representation_from_req(issuer, lloa, datasetA, datasetB)
+    try:
+        result.uri = build_uri_representation_from_req(issuer, lloa, datasetA, datasetB)
+    except LinkURIBuildError as err:
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
+                               "Error building link URI: " + str(err))
+
 
     result_json = result.json_marshall()
     # TODO: sign the response json string
@@ -331,7 +343,9 @@ def linking_request_result(request_id):
     except SessionManagerError as err:
         return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
                                "Error writing updated linkRequest to dataStore: " + str(err))
-
+    except StoreIDBuildError as err:
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
+                               "Error building store ID: " + str(err))
     try:
         delete_request(request_id)
     except RegisterNotFound:
