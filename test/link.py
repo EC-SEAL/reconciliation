@@ -5,7 +5,7 @@ import logging
 
 from lib.Tools import load_json_file
 from lib.dto.LinkRequest import LinkRequest
-from lib.reconciliation import Reconciliation
+from lib.reconciliation import Reconciliation, NoMatchingRules
 
 
 class LinkTest(unittest.TestCase):
@@ -58,3 +58,15 @@ class LinkTest(unittest.TestCase):
         print(reqj)
         print(sim)
         self.assertEqual(sim, 1.0)
+
+    def test_4(self):
+        maps = load_json_file('data/attributeMaps.json', encoding='utf8')
+        reqj = load_json_file('data/testLinkRequest4.json', encoding='utf8')
+
+        lreq = LinkRequest()
+        lreq.unmarshall(reqj)
+
+        r = Reconciliation()
+        r.set_mappings(maps)
+        with self.assertRaises(NoMatchingRules) as context:
+            sim = r.similarity(lreq.datasetA, lreq.datasetB)

@@ -46,6 +46,9 @@ class Reconciliation:
         compare_tuples = self.processor.transform(dataset_a,
                                                   dataset_b,
                                                   self.mappings)
+        if not len(compare_tuples):
+            raise NoMatchingRules("No compare tuples could be generated")
+
         # Set the similarity of each tuple
         for ctuple in compare_tuples:
             ctuple.normalised_similarity = self.comparator.compare(ctuple.items[0],
@@ -91,6 +94,11 @@ class Reconciliation:
 
 
 class MissingOrBadParams(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
+class NoMatchingRules(Exception):
     def __init__(self, message):
         self.message = message
 

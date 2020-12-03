@@ -17,7 +17,7 @@ from lib.Tools import load_json_file, build_store_id_from_req, \
 from lib.dto.Dataset import Dataset
 from lib.dto.LinkRequest import LinkRequest
 from lib.dto.StatusResponse import StatusResponse, StatusCodes
-from lib.reconciliation import Reconciliation
+from lib.reconciliation import Reconciliation, NoMatchingRules, MissingOrBadParams
 import database
 
 # Config location
@@ -120,7 +120,11 @@ def submit_linking_request():
     session.commit()
 
     # Calculate similarity
-    similarity = reconciliation.similarity(req.datasetA, req.datasetB)
+    try:
+        similarity = reconciliation.similarity(req.datasetA, req.datasetB)
+    except (NoMatchingRules, MissingOrBadParams) as err:
+        return redirect_return(smh, dest_url, 'ERROR', msID, apigwID,
+                               "Error performing the similarity check: " + str(err))
     db_req.similarity = similarity
 
     # Update request with the LLoA and the acceptance status

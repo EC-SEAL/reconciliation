@@ -65,6 +65,12 @@ class Processing:
                 if compare_string:
                     tuple_candidates_b.add(compare_string)
 
+            # For some weird reason, no strings were produced, so
+            # ignore and go on with the next transform
+            if not len(tuple_candidates_a) or not len(tuple_candidates_b):
+                logging.warning("A transform with valid pairings returned an empty string for the tuple")
+                continue
+
             # As potentially multiple compare strings may have generated from equivalent
             # rules, choose the one that will provide a stronger match
             tuple_member_a = self.best_candidate(tuple_candidates_a, processor)

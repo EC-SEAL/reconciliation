@@ -1,0 +1,147 @@
+{
+  "id": null,
+  "uri": null,
+  "issuer": null,
+  "lloa": null,
+  "type": null,
+  "issued": null,
+  "expiration": null,
+  "evidence": null,
+  "conversation": null,
+  "datasetA": {
+    "id": "someId",
+    "type": "eIDAS",
+    "categories": [],
+    "issuerId": "issuerEntityId",
+    "subjectId": "PersonIdentifier",
+    "loa": "low",
+    "issued": "Thu, 3 Dec 2020 12:04:11 GMT",
+    "expiration": null,
+    "attributes": [
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName",
+        "friendlyName": "FamilyName",
+        "encoding": "UTF-8",
+        "language": "N/A",
+        "mandatory": true,
+        "values": [
+          "ΠΑΛΙΟΚΩΣΤΑ PALIOKOSTA"
+        ]
+      },
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName",
+        "friendlyName": "GivenName",
+        "encoding": "UTF-8",
+        "language": "N/A",
+        "mandatory": true,
+        "values": [
+          "ΧΡΙΣΤΙΝΑ CHRISTINA"
+        ]
+      },
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/DateOfBirth",
+        "friendlyName": "DateOfBirth",
+        "encoding": "UTF-8",
+        "language": "N/A",
+        "mandatory": true,
+        "values": [
+          "1980-01-01"
+        ]
+      },
+      {
+        "name": "http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier",
+        "friendlyName": "PersonIdentifier",
+        "encoding": "UTF-8",
+        "language": "N/A",
+        "mandatory": true,
+        "values": [
+          "GR/GR/ERMIS-58333947"
+        ]
+      },
+      {
+        "name": "http://eidas.europa.eu/LoA",
+        "friendlyName": "LevelOfAssurance",
+        "encoding": "UTF-8",
+        "language": "N/A",
+        "mandatory": true,
+        "values": [
+          "1"
+        ]
+      },
+      {
+        "name": "eidasDatasetIssuer",
+        "friendlyName": "eidasDatasetIssuer",
+        "encoding": "UTF-8",
+        "language": "N/A",
+        "mandatory": true,
+        "values": [
+          "eIDAS_GR"
+        ]
+      },
+      {
+        "name": "issuerEntityId",
+        "friendlyName": "issuerEntityId",
+        "encoding": "null",
+        "language": "null",
+        "mandatory": true,
+        "values": [
+          "https://eidas.gov.gr"
+        ]
+      }
+    ],
+    "properties": null
+  },
+  "datasetB": {
+    "id": "someId",
+    "type": "eduGAIN",
+    "categories": [],
+    "issuerId": "issuerEntityId2",
+    "subjectId": "urn:oid:1.3.6.1.4.1.5923.1.1.1.6",
+    "loa": "low",
+    "issued": "Thu, 3 Dec 2020 12:04:24 GMT",
+    "expiration": null,
+    "attributes": [
+      {
+        "name": "issuerEntityId",
+        "friendlyName": "issuerEntityId",
+        "encoding": null,
+        "language": null,
+        "mandatory": true,
+        "values": [
+          "https://eid-proxy.aai.grnet.gr/Saml2IDP/proxy.xml"
+        ]
+      },
+      {
+        "name": "urn:oid:1.3.6.1.4.1.5923.1.1.1.10",
+        "friendlyName": "eduPersonTargetedID",
+        "encoding": null,
+        "language": null,
+        "mandatory": true,
+        "values": [
+          null
+        ]
+      },
+      {
+        "name": "urn:oid:0.9.2342.19200300.100.1.3",
+        "friendlyName": "mail",
+        "encoding": null,
+        "language": null,
+        "mandatory": true,
+        "values": [
+          "seal-test0@example.com"
+        ]
+      },
+      {
+        "name": "issuerEntityId2",
+        "friendlyName": "issuerEntityId",
+        "encoding": "null",
+        "language": "null",
+        "mandatory": true,
+        "values": [
+          "https://eid-proxy.aai-dev.grnet.gr/Saml2IDP/proxy.xml"
+        ]
+      }
+    ],
+    "properties": null
+  }
+}
