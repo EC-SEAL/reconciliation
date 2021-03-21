@@ -70,14 +70,18 @@ def get_session_manager():
 
 # API Endpoints
 
-@app.route('/link/request/submit', methods=['POST'])
+@app.route('/link/request/submit', methods=['POST', 'GET'])
 def submit_linking_request():
     clean_expired()
 
     # Check msToken against SM
-    if 'msToken' not in request.form:
-        return "missing msToken POST parameter or bad content-type", 404
-    msToken = request.form['msToken']
+    if 'msToken' in request.form:
+        msToken = request.form['msToken']
+    elif 'msToken' in request.args:
+        msToken = request.args['msToken']
+    else:
+        return "missing msToken POST/GET parameter or bad content-type", 404
+
     smh = get_session_manager()
     try:
         smh.validateToken(msToken)
@@ -198,14 +202,17 @@ def linking_request_status(request_id):
                     mimetype='application/json')
 
 
-@app.route('/link/<request_id>/cancel', methods=['POST'])
+@app.route('/link/<request_id>/cancel', methods=['POST', 'GET'])
 def cancel_linking_request(request_id):
     clean_expired()
 
     # Check msToken against SM
-    if 'msToken' not in request.form:
-        return "missing msToken POST parameter or bad content-type", 404
-    msToken = request.form['msToken']
+    if 'msToken' in request.form:
+        msToken = request.form['msToken']
+    elif 'msToken' in request.args:
+        msToken = request.args['msToken']
+    else:
+        return "missing msToken POST/GET parameter or bad content-type", 404
     smh = get_session_manager()
     try:
         smh.validateToken(msToken)
@@ -251,14 +258,17 @@ def cancel_linking_request(request_id):
         return redirect_return(smh, dest_url, 'ERROR', msID, apigwID, "Request not found")
 
 
-@app.route('/link/<request_id>/result/get', methods=['POST'])
+@app.route('/link/<request_id>/result/get', methods=['POST', 'GET'])
 def linking_request_result(request_id):
     clean_expired()
 
     # Check msToken against SM
-    if 'msToken' not in request.form:
-        return "missing msToken POST parameter or bad content-type", 404
-    msToken = request.form['msToken']
+    if 'msToken' in request.form:
+        msToken = request.form['msToken']
+    elif 'msToken' in request.args:
+        msToken = request.args['msToken']
+    else:
+        return "missing msToken POST/GET parameter or bad content-type", 404
     smh = get_session_manager()
     try:
         smh.validateToken(msToken)
