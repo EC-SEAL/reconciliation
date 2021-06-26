@@ -1,6 +1,6 @@
 [
   {
-    "description": "eIDAS to eduPerson principal name mapping",
+    "description": "eIDAS, eduPerson, ePassport principal name mapping",
     "weight": 1.0,
     "processor": "StringProcessor",
     "pairings": [
@@ -15,6 +15,18 @@
         ],
         "regexp": null,
         "replace": null
+      },
+      {
+        "profile": "eMRTD",
+        "issuer": null,
+        "categories": [],
+        "attributes": [
+          "$GivenName",
+          " ",
+          "$Surname"
+        ],
+        "regexp": "[\\[\\]' ,]+",
+        "replace": " "
       },
       {
         "profile": "eduGAIN",
@@ -66,6 +78,33 @@
     "pairings": [
       {
         "profile": "eIDAS",
+        "issuer": null,
+        "categories": [],
+        "attributes": [
+          "$DateOfBirth"
+        ],
+        "regexp": null,
+        "replace": null
+      }
+    ]
+  },
+  {
+    "description": "eIDAS, ePassport birth date mapping (because year in date not full and can't normalise to iso)",
+    "weight": 1.0,
+    "processor": "DateProcessor",
+    "pairings": [
+      {
+        "profile": "eIDAS",
+        "issuer": null,
+        "categories": [],
+        "attributes": [
+          "$DateOfBirth"
+        ],
+        "regexp": "^(19|20)([0-9]{2})-([0-9]{2})-([0-9]{2})",
+        "replace": "\\2\\3\\4"
+      },
+      {
+        "profile": "eMRTD",
         "issuer": null,
         "categories": [],
         "attributes": [
