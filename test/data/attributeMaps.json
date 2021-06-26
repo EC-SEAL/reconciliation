@@ -49,6 +49,16 @@
         ],
         "regexp": null,
         "replace": null
+      },
+      {
+        "profile": "eduGAIN",
+        "issuer": null,
+        "categories": [],
+        "attributes": [
+          "$cn"
+        ],
+        "regexp": null,
+        "replace": null
       }
     ]
   },
